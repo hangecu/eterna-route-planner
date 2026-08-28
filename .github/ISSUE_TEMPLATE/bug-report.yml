@@ -1,0 +1,45 @@
+name: Ошибка программы
+description: Сообщить о проблеме интерфейса, расчёта или запуска
+title: "[Ошибка]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за сообщение. Опишите проблему своими словами и не публикуйте личные данные.
+  - type: input
+    id: version
+    attributes:
+      label: Версия планировщика
+      description: Номер GitHub Release или дата скачивания.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Браузер и операционная система
+      placeholder: Например, Chrome 140, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Что произошло
+      description: Опишите фактическое и ожидаемое поведение.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+      description: Перечислите действия в самом планировщике.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe-content
+    attributes:
+      label: Проверка вложений
+      options:
+        - label: Вложения не содержат личных данных или сторонних материалов.
+          required: true

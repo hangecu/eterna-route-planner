@@ -1,0 +1,49 @@
+name: Исправление события
+description: Сообщить о неверном условии или последствии
+title: "[Данные]: "
+labels:
+  - data
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите своими словами то, что можно подтвердить обычным прохождением.
+  - type: input
+    id: game-version
+    attributes:
+      label: Версия игры
+      description: Если она известна из обычного интерфейса игры.
+  - type: input
+    id: event
+    attributes:
+      label: Событие
+    validations:
+      required: true
+  - type: input
+    id: choice
+    attributes:
+      label: Выбор
+    validations:
+      required: true
+  - type: textarea
+    id: planner-result
+    attributes:
+      label: Что сейчас показывает планировщик
+    validations:
+      required: true
+  - type: textarea
+    id: observed-result
+    attributes:
+      label: Что наблюдается при прохождении
+      description: Кратко опишите условие или изменение характеристики без цитирования сюжетного текста.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ordinary-play
+    attributes:
+      label: Источник проверки
+      options:
+        - label: Сведения проверены во время обычного прохождения.
+          required: true
+        - label: Сообщение написано своими словами и не содержит сторонних материалов.
+          required: true

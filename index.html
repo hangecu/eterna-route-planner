@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Неофициальный интерактивный планировщик прохождения The Life and Suffering of Prince Jerian.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%23171818'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Georgia,serif' font-size='44' fill='%23f0cc83'%3EE%3C/text%3E%3C/svg%3E">
+  <title>Eterna Route Planner — The Life and Suffering of Prince Jerian</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="app">
+    <div id="attributeBar" class="attribute-bar">
+      <button id="headerToggleButton" class="compact-control-button header-toggle-button" type="button" aria-label="Скрыть шапку" aria-expanded="true" title="Скрыть шапку" data-i18n-aria-label="header.hide" data-i18n-title="header.hide">⌃</button>
+      <div class="attribute-sidebar">
+        <div class="attribute-controls">
+          <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору" data-i18n="header.current" data-i18n-title="header.currentTitle">К текущему</button>
+          <div class="tools-menu-wrap">
+            <button id="toolsMenuButton" class="compact-control-button" type="button" aria-label="Инструменты" aria-controls="toolsMenu" aria-expanded="false" title="Инструменты" data-i18n-aria-label="tools.title" data-i18n-title="tools.title">☰</button>
+            <div id="toolsMenu" class="tools-menu" aria-hidden="true">
+              <input id="search" class="search" type="search" placeholder="Найти сцену или выбор…" autocomplete="off" data-i18n-placeholder="tools.search">
+              <span id="searchSummary" class="search-summary"></span>
+              <select id="languageSelect" aria-label="Язык / Language"></select>
+              <select id="chapterJump" aria-label="Перейти к главе" data-i18n-aria-label="tools.chapter"></select>
+              <button id="hiddenScenesButton" type="button" data-i18n="tools.hidden">Скрытые сцены</button>
+              <button id="stateButton" type="button" data-i18n="tools.state">Состояние</button>
+              <button id="routeFileButton" type="button" data-i18n="tools.routeFile">Маршрут: сохранить / загрузить</button>
+              <a id="supportLink" class="support-link" href="https://web.tribute.tg/d/Ps8" target="_blank" rel="noopener noreferrer external" data-i18n="tools.support" data-i18n-title="tools.supportTitle">Поддержать · ₽ ↗</a>
+              <button id="resetButton" class="danger" type="button" data-i18n="tools.reset">Сбросить выборы</button>
+            </div>
+          </div>
+          <div class="route-info-wrap">
+            <button id="routeInfoButton" class="compact-control-button" type="button" aria-label="Сводка и обозначения" aria-controls="routeInfoPanel" aria-expanded="false" title="Сводка и обозначения" data-i18n-aria-label="routeInfo.title" data-i18n-title="routeInfo.title">?</button>
+            <div id="routeInfoPanel" class="route-info-panel" aria-hidden="true">
+              <span class="route-info-title" data-i18n="routeInfo.route">Маршрут</span>
+              <span id="summary" class="route-summary" data-i18n="routeInfo.loading">Загрузка…</span>
+              <span class="route-info-title" data-i18n="routeInfo.legend">Обозначения</span>
+              <div class="legend" aria-hidden="true">
+                <span data-i18n="routeInfo.available">доступно</span>
+                <span class="unavailable" data-i18n="routeInfo.unavailable">недоступно</span>
+                <span class="chosen" data-i18n="routeInfo.chosen">выбрано</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="attributeContext" class="attribute-context"></div>
+        <span id="routeNotice" class="route-notice" role="status" aria-live="polite"></span>
+      </div>
+      <div id="attributeGroups" class="attribute-groups"></div>
+    </div>
+    <div class="timeline-shell">
+      <div class="timeline-phase-overlay" aria-hidden="true"><span data-i18n="timeline.past">Сделанные выборы</span><span data-i18n="timeline.current">Текущий</span><span data-i18n="timeline.future">Впереди</span></div>
+      <div class="timeline-center-line" aria-hidden="true"></div>
+      <main id="timelineViewport" class="timeline-viewport">
+        <div id="timeline" class="timeline"></div>
+      </main>
+    </div>
+  </div>
+
+  <div id="backdrop" class="backdrop"></div>
+  <aside id="statePanel" class="side-panel" aria-hidden="true">
+    <div class="panel-head">
+      <h2 id="panelTitle" data-i18n="panel.stateTitle">Состояние прохождения</h2>
+      <button id="closePanel" type="button" data-i18n="panel.close">Закрыть</button>
+    </div>
+    <div id="panelBody" class="panel-body"></div>
+  </aside>
+
+  <div id="routeFileBackdrop" class="route-file-backdrop"></div>
+  <section id="routeFileDialog" class="route-file-dialog" role="dialog" aria-modal="true" aria-labelledby="routeFileTitle" aria-describedby="routeFileDescription" aria-hidden="true">
+    <div class="route-file-head">
+      <div>
+        <h2 id="routeFileTitle" data-i18n="routeFile.title">Сохранение маршрута</h2>
+        <p id="routeFileDescription" data-i18n="routeFile.description">Файл содержит только выбранные варианты.</p>
+      </div>
+      <button id="closeRouteFile" type="button" data-i18n="panel.close">Закрыть</button>
+    </div>
+    <div class="route-file-body">
+      <p id="routeFileSummary" class="route-file-summary"></p>
+      <div class="route-file-actions">
+        <button id="exportRouteFileButton" class="primary" type="button" data-i18n="routeFile.download">Скачать маршрут (.json)</button>
+        <button id="importRouteFileButton" type="button" data-i18n="routeFile.upload">Загрузить маршрут (.json)</button>
+        <button id="exportMemoButton" type="button" data-i18n="routeFile.memo">Скачать памятку (.txt)</button>
+      </div>
+      <p id="routeFileStatus" class="route-file-status" role="status" aria-live="polite"></p>
+      <input id="routeFileInput" type="file" accept=".json,application/json" hidden>
+    </div>
+  </section>
+
+  <div id="choiceHistoryBackdrop" class="choice-history-backdrop"></div>
+  <section id="choiceHistoryDialog" class="choice-history-dialog" role="dialog" aria-modal="true" aria-labelledby="choiceHistoryTitle" aria-hidden="true">
+    <div class="choice-history-head">
+      <div class="choice-history-heading">
+        <h2 id="choiceHistoryTitle" data-i18n="history.editTitle">Изменить прошлые выборы</h2>
+        <div id="choiceHistoryTarget" class="choice-history-target"></div>
+      </div>
+      <button id="closeChoiceHistory" type="button" data-i18n="panel.close">Закрыть</button>
+    </div>
+    <div id="choiceHistoryStatus" class="choice-history-status"></div>
+    <div id="choiceHistoryTrack" class="choice-history-track"></div>
+  </section>
+
+  <noscript><div class="noscript">Для работы планировщика нужно разрешить JavaScript. / JavaScript must be enabled to use the planner.</div></noscript>
+  <script src="locales/ui.js"></script>
+  <script src="locales/en.js"></script>
+  <script src="data/choice-systems.js"></script>
+  <script src="data/events/chapter-1.js"></script>
+  <script src="data/events/chapter-2.js"></script>
+  <script src="data/events/chapter-3.js"></script>
+  <script src="data/events/chapter-4.js"></script>
+  <script src="data/events/chapter-5.js"></script>
+  <script src="data/state-catalogue.js"></script>
+  <script src="data/initial-state.js"></script>
+  <script src="data/planner-data.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/route-file.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
