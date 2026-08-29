@@ -591,6 +591,10 @@
     return scene.recurring === true;
   }
 
+  function sceneOccurrenceKey(scene) {
+    return scene.occurrenceKey || scene.id;
+  }
+
   function automaticEndingEffects(scene) {
     return (scene.effects || []).filter(effect => effect.type === "ending" && effect.unlocked);
   }
@@ -599,7 +603,7 @@
   function replay() {
     let state = initialState();
     const sceneResults = new Map();
-    const shownSceneIds = new Set();
+    const shownOccurrenceKeys = new Set();
     const usedOptions = new Set();
     const touched = new Set();
     const recurringPlacements = new Map();
@@ -627,7 +631,7 @@
     function applyAvailableScene(item, result) {
       const { chapter, scene, key } = item;
       const stateBefore = result.state;
-      shownSceneIds.add(scene.id);
+      shownOccurrenceKeys.add(sceneOccurrenceKey(scene));
 
       if (!sceneHasPlanningEffect(scene)) {
         result.presentationOmitted = true;
@@ -707,7 +711,7 @@
     function processRegularScene(item) {
       const { scene, key } = item;
       const appearanceSatisfied = evaluateGroup(scene.appearance, state, scene, null);
-      const alreadyShown = appearanceSatisfied && shownSceneIds.has(scene.id);
+      const alreadyShown = appearanceSatisfied && shownOccurrenceKeys.has(sceneOccurrenceKey(scene));
       const available = appearanceSatisfied && !alreadyShown;
       const result = makeSceneResult(item, available, appearanceSatisfied, alreadyShown);
       sceneResults.set(key, result);
@@ -728,7 +732,7 @@
         const previous = sceneResults.get(key);
         if (previous?.alreadyShown) continue;
         const appearanceSatisfied = evaluateGroup(scene.appearance, state, scene, null);
-        const alreadyShown = shownSceneIds.has(scene.id);
+        const alreadyShown = shownOccurrenceKeys.has(sceneOccurrenceKey(scene));
         const available = appearanceSatisfied && !alreadyShown;
         const result = makeSceneResult(item, available, appearanceSatisfied, alreadyShown);
         sceneResults.set(key, result);
@@ -751,7 +755,7 @@
           recurringScenes.push(item);
           if (!sceneResults.has(item.key)) {
             const appearanceSatisfied = evaluateGroup(item.scene.appearance, state, item.scene, null);
-            sceneResults.set(item.key, makeSceneResult(item, false, appearanceSatisfied, shownSceneIds.has(item.scene.id), {
+            sceneResults.set(item.key, makeSceneResult(item, false, appearanceSatisfied, shownOccurrenceKeys.has(sceneOccurrenceKey(item.scene)), {
               recurringBlocked: true
             }));
           }

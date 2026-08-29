@@ -352,6 +352,8 @@ if (!payload?.planner || !payload?.metadata) {
   }
 
   const sceneIds = new Set();
+  const occurrenceGroups = new Map();
+  const recurringDefinitionGroups = new Map();
   for (const chapter of chapters || []) {
     if (!Array.isArray(chapter.scenes)) {
       fail(`${chapter.id || "неизвестная глава"}: отсутствует массив scenes`);
@@ -361,6 +363,23 @@ if (!payload?.planner || !payload?.metadata) {
       if (!scene.id || !scene.title) fail(`${chapter.id}: событие без id или title`);
       if (sceneIds.has(scene.id)) fail(`Повторяется идентификатор события: ${scene.id}`);
       sceneIds.add(scene.id);
+
+      if (scene.recurring) {
+        const { id, occurrenceKey: ignoredOccurrenceKey, ...definition } = scene;
+        const signature = JSON.stringify(definition);
+        if (!recurringDefinitionGroups.has(signature)) recurringDefinitionGroups.set(signature, []);
+        recurringDefinitionGroups.get(signature).push({ chapter, scene });
+      }
+
+      if (scene.occurrenceKey !== undefined) {
+        if (typeof scene.occurrenceKey !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(scene.occurrenceKey)) {
+          fail(`${scene.id}: общий ключ появления должен быть непустой строкой из латинских букв, цифр и дефисов`);
+        } else {
+          if (!scene.recurring) fail(`${scene.id}: общий ключ появления допустим только для повторно проверяемого события`);
+          if (!occurrenceGroups.has(scene.occurrenceKey)) occurrenceGroups.set(scene.occurrenceKey, []);
+          occurrenceGroups.get(scene.occurrenceKey).push({ chapter, scene });
+        }
+      }
 
       const choices = scene.choiceSystem
         ? payload.planner.choiceSystems?.[scene.choiceSystem]?.options || []
@@ -387,6 +406,34 @@ if (!payload?.planner || !payload?.metadata) {
         if (choiceKeys.has(key)) fail(`${scene.id}: повторяется выбор ${key}`);
         choiceKeys.add(key);
       }
+    }
+  }
+
+  for (const occurrences of recurringDefinitionGroups.values()) {
+    const chapterIds = new Set(occurrences.map(({ chapter }) => chapter.id));
+    if (chapterIds.size < 2) continue;
+    const withoutOccurrenceKey = occurrences.filter(({ scene }) => !scene.occurrenceKey);
+    if (withoutOccurrenceKey.length) {
+      const sceneList = withoutOccurrenceKey.map(({ scene }) => scene.id).join(", ");
+      fail(`Повторно подключённое событие не имеет проверенного общего ключа появления: ${sceneList}`);
+    }
+  }
+
+  for (const [occurrenceKey, occurrences] of occurrenceGroups) {
+    if (occurrences.length < 2) {
+      fail(`${occurrenceKey}: общий ключ появления указан только у одного события`);
+      continue;
+    }
+    const chapterIds = new Set(occurrences.map(({ chapter }) => chapter.id));
+    if (chapterIds.size !== occurrences.length) {
+      fail(`${occurrenceKey}: в одной главе повторяется одно и то же общее событие`);
+    }
+    const definitions = new Set(occurrences.map(({ scene }) => {
+      const { id, occurrenceKey: ignoredOccurrenceKey, ...definition } = scene;
+      return JSON.stringify(definition);
+    }));
+    if (definitions.size !== 1) {
+      fail(`${occurrenceKey}: копии общего события различаются условиями, вариантами или последствиями`);
     }
   }
 

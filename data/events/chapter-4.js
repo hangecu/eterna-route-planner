@@ -11,6 +11,7 @@ globalThis.PLANNER_CHAPTERS.push({
   "scenes": [
     {
       "id": "scene-4-1",
+      "occurrenceKey": "sanity-crack",
       "title": "Трещина",
       "type": "hidden",
       "appearance": {
@@ -107,6 +108,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-2",
+      "occurrenceKey": "sanity-fracture",
       "title": "Надлом",
       "type": "hidden",
       "appearance": {
@@ -364,6 +366,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-3",
+      "occurrenceKey": "sanity-collapse",
       "title": "Распад",
       "type": "hidden",
       "appearance": {
@@ -705,6 +708,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-4",
+      "occurrenceKey": "sanity-shards",
       "title": "Осколки",
       "type": "hidden",
       "appearance": {
@@ -980,6 +984,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-5",
+      "occurrenceKey": "sanity-void",
       "title": "Пустота",
       "type": "hidden",
       "appearance": {
@@ -1035,6 +1040,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-6",
+      "occurrenceKey": "insurrection-cracks-in-glass",
       "title": "Трещины на стекле",
       "type": "hidden",
       "appearance": {
@@ -1156,6 +1162,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-7",
+      "occurrenceKey": "insurrection-givers-hand",
       "title": "Рука дающего",
       "type": "hidden",
       "appearance": {
@@ -1212,6 +1219,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-8",
+      "occurrenceKey": "insurrection-no-dawn",
       "title": "Рассвета не будет",
       "type": "hidden-no-choice",
       "appearance": {
@@ -1245,6 +1253,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-9",
+      "occurrenceKey": "empire-dogma-flourishing",
       "title": "Расцвет Догмы",
       "type": "hidden",
       "appearance": {
@@ -1597,6 +1606,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-10",
+      "occurrenceKey": "empire-dogma-triumph",
       "title": "Торжество Догмы",
       "type": "hidden",
       "appearance": {
@@ -1892,6 +1902,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-11",
+      "occurrenceKey": "empire-dogma-absolute",
       "title": "Абсолют Догмы",
       "type": "hidden",
       "appearance": {
@@ -1990,6 +2001,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-12",
+      "occurrenceKey": "empire-elitism-flourishing",
       "title": "Расцвет Элитаризма",
       "type": "hidden",
       "appearance": {
@@ -2303,6 +2315,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-13",
+      "occurrenceKey": "empire-elitism-triumph",
       "title": "Торжество Элитаризма",
       "type": "hidden",
       "appearance": {
@@ -2598,6 +2611,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-14",
+      "occurrenceKey": "empire-elitism-absolute",
       "title": "Абсолют Элитаризма",
       "type": "hidden",
       "appearance": {
@@ -2696,6 +2710,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-15",
+      "occurrenceKey": "empire-dogma-crisis",
       "title": "Кризис Догмы",
       "type": "hidden",
       "appearance": {
@@ -2865,6 +2880,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-16",
+      "occurrenceKey": "empire-law-flourishing",
       "title": "Расцвет Права",
       "type": "hidden",
       "appearance": {
@@ -3182,6 +3198,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-17",
+      "occurrenceKey": "empire-law-triumph",
       "title": "Торжество Права",
       "type": "hidden",
       "appearance": {
@@ -3463,6 +3480,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-18",
+      "occurrenceKey": "empire-law-absolute",
       "title": "Абсолют Права",
       "type": "scene-no-choice",
       "appearance": {
@@ -3568,6 +3586,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-19",
+      "occurrenceKey": "empire-tradition-crisis",
       "title": "Кризис Традиций",
       "type": "hidden",
       "appearance": {
@@ -3737,6 +3756,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-20",
+      "occurrenceKey": "empire-progress-flourishing",
       "title": "Расцвет Прогресса",
       "type": "hidden",
       "appearance": {
@@ -4082,6 +4102,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-21",
+      "occurrenceKey": "empire-progress-triumph",
       "title": "Торжество Прогресса",
       "type": "hidden",
       "appearance": {
@@ -4377,6 +4398,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-22",
+      "occurrenceKey": "empire-progress-absolute",
       "title": "Абсолют Прогресса",
       "type": "hidden",
       "appearance": {
@@ -4475,6 +4497,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-23",
+      "occurrenceKey": "empire-elitism-crisis",
       "title": "Кризис Элитаризма",
       "type": "hidden",
       "appearance": {
@@ -4665,6 +4688,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-24",
+      "occurrenceKey": "empire-equality-flourishing",
       "title": "Расцвет Равенства",
       "type": "hidden",
       "appearance": {
@@ -5010,6 +5034,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-25",
+      "occurrenceKey": "empire-equality-triumph",
       "title": "Торжество Равенства",
       "type": "hidden",
       "appearance": {
@@ -5284,6 +5309,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-26",
+      "occurrenceKey": "empire-equality-absolute",
       "title": "Абсолют Равенства",
       "type": "hidden",
       "appearance": {
@@ -5382,6 +5408,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-27",
+      "occurrenceKey": "empire-tradition-flourishing",
       "title": "Расцвет Традиций",
       "type": "hidden",
       "appearance": {
@@ -5727,6 +5754,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-28",
+      "occurrenceKey": "empire-tradition-triumph",
       "title": "Торжество Традиций",
       "type": "hidden",
       "appearance": {
@@ -6022,6 +6050,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-29",
+      "occurrenceKey": "empire-tradition-absolute",
       "title": "Абсолют Традиций",
       "type": "scene-no-choice",
       "appearance": {
@@ -6120,6 +6149,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-30",
+      "occurrenceKey": "loyalty-commoners-wrath",
       "title": "Гнев простого сословия",
       "type": "hidden",
       "appearance": {
@@ -6394,6 +6424,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-31",
+      "occurrenceKey": "loyalty-commoners-revolt",
       "title": "Мятеж простого сословия",
       "type": "hidden",
       "appearance": {
@@ -6688,6 +6719,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-32",
+      "occurrenceKey": "loyalty-worthy-arkns-wrath",
       "title": "Гнев Достойных аркнов",
       "type": "hidden",
       "appearance": {
@@ -7014,6 +7046,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-33",
+      "occurrenceKey": "loyalty-worthy-arkns-revolt",
       "title": "Мятеж Достойных аркнов",
       "type": "hidden",
       "appearance": {
@@ -7295,6 +7328,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-34",
+      "occurrenceKey": "loyalty-great-houses-wrath",
       "title": "Гнев Великих домов",
       "type": "hidden",
       "appearance": {
@@ -7582,6 +7616,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-35",
+      "occurrenceKey": "loyalty-great-houses-revolt",
       "title": "Мятеж Великих домов",
       "type": "hidden",
       "appearance": {
@@ -7863,6 +7898,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-36",
+      "occurrenceKey": "loyalty-human-nobility-wrath",
       "title": "Гнев людского дворянства",
       "type": "hidden",
       "appearance": {
@@ -8176,6 +8212,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-37",
+      "occurrenceKey": "loyalty-old-faith-wrath",
       "title": "Гнев Старой Веры",
       "type": "hidden",
       "appearance": {
@@ -8437,6 +8474,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-38",
+      "occurrenceKey": "loyalty-old-faith-revolt",
       "title": "Мятеж Старой Веры",
       "type": "hidden",
       "appearance": {
@@ -8718,6 +8756,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-39",
+      "occurrenceKey": "loyalty-human-nobility-revolt",
       "title": "Мятеж людского дворянства",
       "type": "hidden",
       "appearance": {
@@ -8999,6 +9038,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-40",
+      "occurrenceKey": "loyalty-new-faith-wrath",
       "title": "Гнев Новой Веры",
       "type": "hidden",
       "appearance": {
@@ -9299,6 +9339,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-41",
+      "occurrenceKey": "loyalty-new-faith-revolt",
       "title": "Мятеж Новой Веры",
       "type": "hidden",
       "appearance": {
@@ -10005,6 +10046,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-46",
+      "occurrenceKey": "loyalty-commoners-wrath-late",
       "title": "Гнев простого сословия",
       "type": "hidden",
       "appearance": {
@@ -10280,6 +10322,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-47",
+      "occurrenceKey": "loyalty-worthy-arkns-wrath-late",
       "title": "Гнев Достойных аркнов",
       "type": "hidden",
       "appearance": {
@@ -10607,6 +10650,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-48",
+      "occurrenceKey": "loyalty-great-houses-wrath-late",
       "title": "Гнев Великих домов",
       "type": "hidden",
       "appearance": {
@@ -10895,6 +10939,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-49",
+      "occurrenceKey": "loyalty-new-faith-wrath-late",
       "title": "Гнев Новой Веры",
       "type": "hidden",
       "appearance": {
@@ -11196,6 +11241,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-50",
+      "occurrenceKey": "loyalty-human-nobility-wrath-late",
       "title": "Гнев людского дворянства",
       "type": "hidden",
       "appearance": {
@@ -11510,6 +11556,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-4-51",
+      "occurrenceKey": "loyalty-old-faith-wrath-late",
       "title": "Гнев Старой Веры",
       "type": "hidden",
       "appearance": {

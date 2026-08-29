@@ -11,6 +11,7 @@ globalThis.PLANNER_CHAPTERS.push({
   "scenes": [
     {
       "id": "scene-2-1",
+      "occurrenceKey": "sanity-fracture",
       "title": "Надлом",
       "type": "hidden",
       "appearance": {
@@ -268,6 +269,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-2-2",
+      "occurrenceKey": "sanity-collapse",
       "title": "Распад",
       "type": "hidden",
       "appearance": {
@@ -609,6 +611,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-2-3",
+      "occurrenceKey": "sanity-shards",
       "title": "Осколки",
       "type": "hidden",
       "appearance": {
@@ -884,6 +887,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-2-4",
+      "occurrenceKey": "sanity-void",
       "title": "Пустота",
       "type": "hidden",
       "appearance": {
@@ -939,6 +943,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-2-5",
+      "occurrenceKey": "empire-tradition-crisis",
       "title": "Кризис Традиций",
       "type": "hidden",
       "appearance": {
@@ -1223,6 +1228,7 @@ globalThis.PLANNER_CHAPTERS.push({
     },
     {
       "id": "scene-2-8",
+      "occurrenceKey": "sanity-crack",
       "title": "Трещина",
       "type": "hidden",
       "appearance": {
