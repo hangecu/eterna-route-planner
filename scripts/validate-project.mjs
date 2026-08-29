@@ -225,9 +225,42 @@ if (!payload?.planner || !payload?.metadata) {
   if (!Array.isArray(chapters) || chapters.length !== 5) fail("Ожидалось пять глав с планируемыми событиями");
   if (!entities || typeof entities !== "object") fail("Не загружен справочник состояний");
 
+  const auxiliaryKinds = new Set([
+    "eventOccurred",
+    "tripSelected",
+    "choiceInSpark",
+    "eventCompleted",
+    "locationInEterna"
+  ]);
   for (const [key, record] of Object.entries(entities || {})) {
-    if (record.auxiliary && record.label !== "Вспомогательное условие") {
-      fail(`${key}: вспомогательное условие содержит отдельное название`);
+    if (record.auxiliary) {
+      if (record.kind !== "objective") fail(`${key}: вспомогательным может быть только логическое состояние`);
+      if (!record.label || record.label === "Вспомогательное условие") {
+        fail(`${key}: вспомогательное состояние не имеет понятного названия`);
+      }
+      if (!auxiliaryKinds.has(record.auxiliaryKind)) {
+        fail(`${key}: неизвестный тип вспомогательного состояния`);
+      }
+    } else if (record.auxiliaryKind) {
+      fail(`${key}: тип вспомогательного состояния указан без auxiliary`);
+    }
+    if (/^Сюжетный итог(?:\s+\d+)?$/u.test(record.label || "")) {
+      fail(`${key}: вместо игрового названия состояния оставлена заглушка`);
+    }
+  }
+
+  const auxiliaryWrites = new Set();
+  function collectAuxiliaryWrites(value) {
+    if (!value || typeof value !== "object") return;
+    if (value.type === "flag" && value.objective?.key && entities?.[value.objective.key]?.auxiliary) {
+      auxiliaryWrites.add(value.objective.key);
+    }
+    for (const child of Object.values(value)) collectAuxiliaryWrites(child);
+  }
+  collectAuxiliaryWrites(payload.planner);
+  for (const [key, record] of Object.entries(entities || {})) {
+    if (record.auxiliary && !auxiliaryWrites.has(key)) {
+      fail(`${key}: вспомогательное состояние нигде не изменяется и не должно показываться пользователю`);
     }
   }
 
@@ -251,6 +284,12 @@ if (!payload?.planner || !payload?.metadata) {
     const englishKeys = Object.keys(englishUi).sort();
     if (JSON.stringify(russianKeys) !== JSON.stringify(englishKeys)) {
       fail("Наборы ключей русского и английского интерфейса различаются");
+    }
+    for (const kind of auxiliaryKinds) {
+      for (const value of ["false", "true"]) {
+        const key = `condition.auxiliary.${kind}.${value}`;
+        if (!russianUi[key] || !englishUi[key]) fail(`Не локализовано отображение ${key}`);
+      }
     }
     checkPublicStrings(englishGame, "locales.en.game");
     function checkEnglishText(value, location) {
@@ -293,10 +332,13 @@ if (!payload?.planner || !payload?.metadata) {
     }
 
     for (const [key, record] of Object.entries(entities || {})) {
-      const synthetic = record.auxiliary || record.kind === "statusGroup" ||
-        key === "state-0365" || key === "state-0165" || key === "state-0311";
+      const synthetic = record.kind === "statusGroup" ||
+        key === "state-0311";
       const localized = englishGame.entities?.[key];
       if (!synthetic && !localized?.label) fail(`${key}: нет английского названия состояния`);
+      if (/^Story outcome(?:\s+\d+)?$/iu.test(localized?.label || "")) {
+        fail(`${key}: в английской локали оставлена заглушка состояния`);
+      }
       if (record.categoryLabel && !localized?.categoryLabel) fail(`${key}: нет английского названия категории`);
       if (record.sides) {
         if (!localized?.sides?.["0"] || !localized?.sides?.["1"]) fail(`${key}: не переведены стороны параметра`);
@@ -353,6 +395,7 @@ if (!payload?.planner || !payload?.metadata) {
 
   const sceneIds = new Set();
   const occurrenceGroups = new Map();
+  const onceGroups = new Map();
   const recurringDefinitionGroups = new Map();
   for (const chapter of chapters || []) {
     if (!Array.isArray(chapter.scenes)) {
@@ -379,6 +422,27 @@ if (!payload?.planner || !payload?.metadata) {
           if (!occurrenceGroups.has(scene.occurrenceKey)) occurrenceGroups.set(scene.occurrenceKey, []);
           occurrenceGroups.get(scene.occurrenceKey).push({ chapter, scene });
         }
+      }
+
+      if (scene.onceKey !== undefined) {
+        if (typeof scene.onceKey !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(scene.onceKey)) {
+          fail(`${scene.id}: ключ однократного события должен быть непустой строкой из латинских букв, цифр и дефисов`);
+        } else {
+          if (!scene.recurring) fail(`${scene.id}: ключ однократного события допустим только для повторно проверяемой сцены`);
+          if (!onceGroups.has(scene.onceKey)) onceGroups.set(scene.onceKey, []);
+          onceGroups.get(scene.onceKey).push({ chapter, scene });
+        }
+      }
+
+      if (scene.locationVariant !== undefined) {
+        if (!new Set(["eterna", "journey"]).has(scene.locationVariant)) {
+          fail(`${scene.id}: неизвестный вариант местоположения ${scene.locationVariant}`);
+        }
+        if (!scene.onceKey) fail(`${scene.id}: вариант местоположения указан без общего ключа однократного события`);
+      }
+
+      if (scene.showLocationChange !== undefined && typeof scene.showLocationChange !== "boolean") {
+        fail(`${scene.id}: настройка показа смены местоположения должна быть логическим значением`);
       }
 
       const choices = scene.choiceSystem
@@ -435,6 +499,15 @@ if (!payload?.planner || !payload?.metadata) {
     if (definitions.size !== 1) {
       fail(`${occurrenceKey}: копии общего события различаются условиями, вариантами или последствиями`);
     }
+  }
+
+  for (const [onceKey, occurrences] of onceGroups) {
+    if (occurrences.length < 2) {
+      fail(`${onceKey}: ключ однократного события указан только у одной сцены`);
+      continue;
+    }
+    const variants = new Set(occurrences.map(({ scene }) => scene.locationVariant).filter(Boolean));
+    if (variants.size === 1) fail(`${onceKey}: общий ключ не связывает разные варианты сцены`);
   }
 
   const missingReferences = new Set();

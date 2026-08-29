@@ -541,6 +541,9 @@ Object.assign(globalThis.PLANNER_LOCALES.languages["en"] ??= {}, {
       "state-0164": {
         "label": "Finest Instructors"
       },
+      "state-0165": {
+        "label": "Estranged"
+      },
       "state-0166": {
         "label": "Human Rights"
       },
@@ -1073,6 +1076,9 @@ Object.assign(globalThis.PLANNER_LOCALES.languages["en"] ??= {}, {
         "categoryLabel": "The Council",
         "label": "Terentius Orgrif"
       },
+      "state-0365": {
+        "label": "Avenged"
+      },
       "state-0366": {
         "label": "Embracing the New Faith"
       },
@@ -1088,6 +1094,81 @@ Object.assign(globalThis.PLANNER_LOCALES.languages["en"] ??= {}, {
       "state-0372": {
         "categoryLabel": "Romantic Interest",
         "label": "Camille Monrogue"
+      },
+      "state-0196": {
+        "label": "Cracks in the Window"
+      },
+      "state-0284": {
+        "label": "Wrath of the Commoners"
+      },
+      "state-0261": {
+        "label": "The Wrath of the Great Houses"
+      },
+      "state-0030": {
+        "label": "Wrath of the Distinguished Arknians"
+      },
+      "state-0347": {
+        "label": "Wrath of the Human Nobility"
+      },
+      "state-0031": {
+        "label": "Wrath of the New Faith"
+      },
+      "state-0170": {
+        "label": "Wrath of the Old Faith"
+      },
+      "state-0236": {
+        "label": "Revolt of the Low Estate"
+      },
+      "state-0368": {
+        "label": "Revolt of the Great Houses"
+      },
+      "state-0264": {
+        "label": "Revolt of the Distinguished Arknians"
+      },
+      "state-0009": {
+        "label": "Revolt of the Human Nobility"
+      },
+      "state-0156": {
+        "label": "Revolt of the New Faith"
+      },
+      "state-0011": {
+        "label": "Rebellion of the Old Faith"
+      },
+      "state-0067": {
+        "label": "Slaughter them all"
+      },
+      "state-0181": {
+        "label": "Put the rebel leaders on trial"
+      },
+      "state-0133": {
+        "label": "Guns of Eliria"
+      },
+      "state-0144": {
+        "label": "Execute the rebel leaders"
+      },
+      "state-0119": {
+        "label": "Blood Oath"
+      },
+      "state-0134": {
+        "label": "Location"
+      },
+      "state-0154": {
+        "label": "Fiona"
+      },
+      "state-0079": {
+        "label": "The Valley of Flowers"
+      },
+      "state-0370": {
+        "label": "Constanta"
+      },
+      "state-0018": {
+        "label": "Astinia"
+      },
+      "state-0189": {
+        "label": "Monia"
+      },
+      "state-0209": {
+        "label": "Magra"
       }
     },
     "metadata": {

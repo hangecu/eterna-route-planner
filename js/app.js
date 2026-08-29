@@ -20,6 +20,8 @@
     en: "https://web.tribute.tg/d/Ptb"
   });
   const STORAGE_KEY = `eterna-route-planner-${meta.schema}`;
+  const LOCATION_RECORD = Object.values(meta.entities).find(record => record.auxiliaryKind === "locationInEterna") || null;
+  const LOCATION_KEY = LOCATION_RECORD?.key || "";
   const CHAPTER_NAMES = Object.fromEntries(planner.chapters.map(chapter => [chapter.id, chapter.title]));
   const TYPE_NAMES = Object.fromEntries([
     "scene", "hidden", "text", "hidden-text", "scene-no-choice",
@@ -592,7 +594,7 @@
   }
 
   function sceneOccurrenceKey(scene) {
-    return scene.occurrenceKey || scene.id;
+    return scene.onceKey || scene.occurrenceKey || scene.id;
   }
 
   function automaticEndingEffects(scene) {
@@ -842,6 +844,17 @@
       }
       case "flag": {
         const current = Boolean(state.objectives[referenceKey(condition.objective)]);
+        const record = entity(condition.objective) || {};
+        if (record.auxiliary && record.auxiliaryKind) {
+          const stateText = value => t(
+            `condition.auxiliary.${record.auxiliaryKind}.${value ? "true" : "false"}`,
+            { label: record.label }
+          );
+          return t("condition.auxiliary", {
+            expected: stateText(!condition.not),
+            current: stateText(current)
+          });
+        }
         return t("condition.objective", {
           objective: label(condition.objective), not: no,
           current: current ? t("common.open") : t("common.closed")
@@ -893,6 +906,18 @@
     }
   }
 
+  function isLocationCondition(condition) {
+    return condition?.type === "flag" && referenceKey(condition.objective) === LOCATION_KEY;
+  }
+
+  function isLocationEffect(effect) {
+    return effect?.type === "flag" && referenceKey(effect.objective) === LOCATION_KEY;
+  }
+
+  function locationValue(inEterna) {
+    return t(inEterna ? "location.eterna" : "location.journey");
+  }
+
   function effectText(effect) {
     switch (effect.type) {
       case "stat": return `${label(effect.parameter)} ${sign(effect.value)}`;
@@ -908,9 +933,14 @@
         }
         return `${label(effect.character)}: ${parts.join(", ")}`;
       }
-      case "flag": return t("effect.flag", {
-        objective: label(effect.objective), action: t(effect.unlocked ? "effect.open" : "effect.close")
-      });
+      case "flag": {
+        if (isLocationEffect(effect)) {
+          return t("effect.location", { location: locationValue(Boolean(effect.unlocked)) });
+        }
+        return t("effect.flag", {
+          objective: label(effect.objective), action: t(effect.unlocked ? "effect.open" : "effect.close")
+        });
+      }
       case "ending": return t("effect.ending", {
         ending: label(effect.ending), action: t(effect.unlocked ? "effect.obtain" : "effect.remove")
       });
@@ -946,6 +976,7 @@
   }
 
   function conditionHtml(condition, state, scene, choice) {
+    if (isLocationCondition(condition)) return "";
     if (condition.type === "block" && !condition.not) {
       const body = groupBodyHtml(condition.block, state, scene, choice);
       return body ? `<div class="condition-block">${body}</div>` : "";
@@ -957,15 +988,16 @@
     if (!group) return "";
     const lines = [];
     const direct = group.conditions || [];
-    for (const condition of direct) lines.push(conditionHtml(condition, state, scene, choice));
-    const alternatives = group.anyOf || [];
+    const directLines = direct.map(condition => conditionHtml(condition, state, scene, choice)).filter(Boolean);
+    lines.push(...directLines);
+    const alternatives = (group.anyOf || []).map(list => list.map(condition =>
+      conditionHtml(condition, state, scene, choice)
+    ).join("")).filter(Boolean);
     if (alternatives.length) {
-      if (direct.length) lines.push(`<div class="logic-block-separator" aria-hidden="true"></div>`);
-      alternatives.forEach((list, index) => {
+      if (directLines.length) lines.push(`<div class="logic-block-separator" aria-hidden="true"></div>`);
+      alternatives.forEach((body, index) => {
         if (index) lines.push(`<div class="logic-or">${escapeHtml(t("common.orLower"))}</div>`);
-        lines.push(`<div class="logic-alternative">${list.map(condition =>
-          conditionHtml(condition, state, scene, choice)
-        ).join("")}</div>`);
+        lines.push(`<div class="logic-alternative">${body}</div>`);
       });
     }
     return lines.join("");
@@ -1011,7 +1043,9 @@
         return parts;
       }
       case "flag":
-        return [state.objectives[referenceKey(effect.objective)] ? t("common.open") : t("common.closed")];
+        return isLocationEffect(effect)
+          ? [locationValue(Boolean(state.objectives[referenceKey(effect.objective)]))]
+          : [state.objectives[referenceKey(effect.objective)] ? t("common.open") : t("common.closed")];
       case "ending":
         return [state.endings[referenceKey(effect.ending)] ? t("common.obtained") : t("common.notObtained")];
       case "faction":
@@ -1090,8 +1124,9 @@
     for (const effect of effects || []) {
       const before = detailed ? snapshotState(working) : null;
       if (working) applyEffect(working, effect);
-      if (effectIsAuxiliary(effect)) continue;
       const transition = detailed ? transitionText(effect, before, working) : "";
+      if (isLocationEffect(effect) && context.showLocationChange === false) continue;
+      if (effectIsAuxiliary(effect) && (!isLocationEffect(effect) || !transition)) continue;
       lines.push(effectLineHtml(effect, transition));
     }
     if (working) {
@@ -1165,7 +1200,8 @@
       state: result.state,
       completeBefore: result.completeBefore,
       payments: availability.payments,
-      settings: choice.settings
+      settings: choice.settings,
+      showLocationChange: item.scene.showLocationChange
     });
     const number = special ? (choice.order || position + 1) : choice.number;
     const choiceLabel = choice.text || choice.title || choice.id;
@@ -1207,13 +1243,17 @@
     const effects = effectsHtml(scene.effects, {
       state: result.state,
       completeBefore: result.completeBefore,
-      settings: scene.settings
+      settings: scene.settings,
+      showLocationChange: scene.showLocationChange
     });
     let reason = "";
     if (!result.available) {
       reason = unavailableSceneReason(item, result);
     }
-    const variant = scene.variant ? `<div class="scene-variant">${escapeHtml(t("scene.variant", { variant: scene.variant }))}</div>` : "";
+    const variants = [];
+    if (scene.locationVariant) variants.push(t(`scene.locationVariant.${scene.locationVariant}`));
+    if (scene.variant) variants.push(t("scene.variant", { variant: scene.variant }));
+    const variant = variants.map(text => `<div class="scene-variant">${escapeHtml(text)}</div>`).join("");
     return `
       <article class="scene-card ${isRecurringScene(scene) ? "recurring-scene" : ""} ${result.available ? "" : "unavailable"} ${selected ? "has-selection" : ""}" data-scene-id="${escapeHtml(scene.id)}" data-scene-key="${escapeHtml(key)}">
         <div class="scene-topline">
@@ -1525,7 +1565,8 @@
       const automaticEffects = effectsHtml(item.scene.effects, {
         state: result.state,
         completeBefore: result.completeBefore,
-        settings: item.scene.settings
+        settings: item.scene.settings,
+        showLocationChange: item.scene.showLocationChange
       });
       const automaticEffectsSection = automaticEffects
         ? `<div class="section-label">${escapeHtml(t("section.automaticEffects"))}</div><div class="logic-group">${automaticEffects}</div>`
@@ -1567,7 +1608,8 @@
           state: result.state,
           completeBefore: result.completeBefore,
           payments: availability.payments,
-          settings: choice.settings
+          settings: choice.settings,
+          showLocationChange: item.scene.showLocationChange
         });
         const effectsSection = effects
           ? `<div class="section-label">${escapeHtml(t("section.effects"))}</div><div class="logic-group">${effects}</div>`

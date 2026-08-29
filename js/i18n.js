@@ -94,10 +94,7 @@
     }
 
     for (const [key, entity] of Object.entries(payload.metadata.entities)) {
-      if (entity.auxiliary) entity.label = t("data.auxiliaryCondition");
       if (entity.kind === "statusGroup") entity.label = t("data.storyPath");
-      if (key === "state-0365") entity.label = t("data.storyOutcome1");
-      if (key === "state-0165") entity.label = t("data.storyOutcome2");
       if (key === "state-0311") entity.label = t("data.preserveYourself");
       if (entity.kind === "bilateral" && entity.sides) {
         entity.label = `${entity.sides["0"]} / ${entity.sides["1"]}`;

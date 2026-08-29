@@ -298,7 +298,7 @@ globalThis.PLANNER_ENTITIES = {
   },
   "state-0365": {
     "kind": "status",
-    "label": "Сюжетный итог 1",
+    "label": "Отомщена",
     "key": "state-0365"
   },
   "state-0247": {
@@ -461,7 +461,7 @@ globalThis.PLANNER_ENTITIES = {
   },
   "state-0165": {
     "kind": "status",
-    "label": "Сюжетный итог 2",
+    "label": "Отчуждение",
     "key": "state-0165"
   },
   "state-0346": {
@@ -586,81 +586,94 @@ globalThis.PLANNER_ENTITIES = {
   },
   "state-0196": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Трещины на стекле",
     "key": "state-0196",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0284": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев простого сословия",
     "key": "state-0284",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0261": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев Великих домов",
     "key": "state-0261",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0030": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев Достойных аркнов",
     "key": "state-0030",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0347": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев людского дворянства",
     "key": "state-0347",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0031": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев Новой Веры",
     "key": "state-0031",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0170": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Гнев Старой Веры",
     "key": "state-0170",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0236": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж простого сословия",
     "key": "state-0236",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0368": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж Великих домов",
     "key": "state-0368",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0264": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж Достойных аркнов",
     "key": "state-0264",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0009": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж людского дворянства",
     "key": "state-0009",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0156": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж Новой Веры",
     "key": "state-0156",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0011": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мятеж Старой Веры",
     "key": "state-0011",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventOccurred"
   },
   "state-0041": {
     "kind": "objective",
@@ -854,27 +867,31 @@ globalThis.PLANNER_ENTITIES = {
   },
   "state-0067": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Уничтожить всех",
     "key": "state-0067",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "choiceInSpark"
   },
   "state-0181": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Судить лидеров мятежа",
     "key": "state-0181",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "choiceInSpark"
   },
   "state-0133": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Ружья Элирии",
     "key": "state-0133",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventCompleted"
   },
   "state-0144": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Казнить лидеров мятежа",
     "key": "state-0144",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "choiceInSpark"
   },
   "state-0237": {
     "kind": "status",
@@ -2584,23 +2601,19 @@ globalThis.PLANNER_ENTITIES = {
     "label": "Во главе Легиона",
     "key": "state-0312"
   },
-  "state-0142": {
-    "kind": "objective",
-    "label": "Вспомогательное условие",
-    "key": "state-0142",
-    "auxiliary": true
-  },
   "state-0119": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Клятва Крови",
     "key": "state-0119",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "eventCompleted"
   },
   "state-0134": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Местоположение",
     "key": "state-0134",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "locationInEterna"
   },
   "state-0226": {
     "kind": "parameter",
@@ -2704,39 +2717,45 @@ globalThis.PLANNER_ENTITIES = {
   },
   "state-0154": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Фиона",
     "key": "state-0154",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0079": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Долина Цветов",
     "key": "state-0079",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0370": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Константа",
     "key": "state-0370",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0018": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Астиния",
     "key": "state-0018",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0189": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Мония",
     "key": "state-0189",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0209": {
     "kind": "objective",
-    "label": "Вспомогательное условие",
+    "label": "Магра",
     "key": "state-0209",
-    "auxiliary": true
+    "auxiliary": true,
+    "auxiliaryKind": "tripSelected"
   },
   "state-0326": {
     "kind": "status",

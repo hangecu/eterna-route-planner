@@ -12,6 +12,7 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-1-2",
       "title": "Чужак",
+      "showLocationChange": false,
       "type": "scene",
       "choices": [
         {

@@ -966,13 +966,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },

@@ -1283,13 +1283,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -1636,13 +1629,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -1932,13 +1918,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -2029,13 +2008,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -2345,13 +2317,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -2641,13 +2606,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -2731,13 +2689,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -2908,13 +2859,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -3228,13 +3172,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -3517,13 +3454,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0327"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -3607,13 +3537,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -3784,13 +3707,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -4132,13 +4048,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -4428,13 +4337,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -4518,13 +4420,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -4716,13 +4611,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -5064,13 +4952,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -5339,13 +5220,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -5436,13 +5310,6 @@ globalThis.PLANNER_CHAPTERS.push({
             "type": "flag",
             "objective": {
               "key": "state-0093"
-            },
-            "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
             },
             "not": true
           }
@@ -5784,13 +5651,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -6080,13 +5940,6 @@ globalThis.PLANNER_CHAPTERS.push({
               "key": "state-0093"
             },
             "not": true
-          },
-          {
-            "type": "flag",
-            "objective": {
-              "key": "state-0142"
-            },
-            "not": true
           }
         ]
       },
@@ -6150,6 +6003,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-30",
       "occurrenceKey": "loyalty-commoners-wrath",
+      "onceKey": "loyalty-commoners-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев простого сословия",
       "type": "hidden",
       "appearance": {
@@ -6720,6 +6575,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-32",
       "occurrenceKey": "loyalty-worthy-arkns-wrath",
+      "onceKey": "loyalty-worthy-arkns-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев Достойных аркнов",
       "type": "hidden",
       "appearance": {
@@ -7329,6 +7186,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-34",
       "occurrenceKey": "loyalty-great-houses-wrath",
+      "onceKey": "loyalty-great-houses-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев Великих домов",
       "type": "hidden",
       "appearance": {
@@ -7899,6 +7758,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-36",
       "occurrenceKey": "loyalty-human-nobility-wrath",
+      "onceKey": "loyalty-human-nobility-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев людского дворянства",
       "type": "hidden",
       "appearance": {
@@ -8213,6 +8074,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-37",
       "occurrenceKey": "loyalty-old-faith-wrath",
+      "onceKey": "loyalty-old-faith-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев Старой Веры",
       "type": "hidden",
       "appearance": {
@@ -9039,6 +8902,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-40",
       "occurrenceKey": "loyalty-new-faith-wrath",
+      "onceKey": "loyalty-new-faith-wrath",
+      "locationVariant": "eterna",
       "title": "Гнев Новой Веры",
       "type": "hidden",
       "appearance": {
@@ -10047,6 +9912,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-46",
       "occurrenceKey": "loyalty-commoners-wrath-late",
+      "onceKey": "loyalty-commoners-wrath",
+      "locationVariant": "journey",
       "title": "Гнев простого сословия",
       "type": "hidden",
       "appearance": {
@@ -10323,6 +10190,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-47",
       "occurrenceKey": "loyalty-worthy-arkns-wrath-late",
+      "onceKey": "loyalty-worthy-arkns-wrath",
+      "locationVariant": "journey",
       "title": "Гнев Достойных аркнов",
       "type": "hidden",
       "appearance": {
@@ -10651,6 +10520,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-48",
       "occurrenceKey": "loyalty-great-houses-wrath-late",
+      "onceKey": "loyalty-great-houses-wrath",
+      "locationVariant": "journey",
       "title": "Гнев Великих домов",
       "type": "hidden",
       "appearance": {
@@ -10940,6 +10811,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-49",
       "occurrenceKey": "loyalty-new-faith-wrath-late",
+      "onceKey": "loyalty-new-faith-wrath",
+      "locationVariant": "journey",
       "title": "Гнев Новой Веры",
       "type": "hidden",
       "appearance": {
@@ -11242,6 +11115,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-50",
       "occurrenceKey": "loyalty-human-nobility-wrath-late",
+      "onceKey": "loyalty-human-nobility-wrath",
+      "locationVariant": "journey",
       "title": "Гнев людского дворянства",
       "type": "hidden",
       "appearance": {
@@ -11557,6 +11432,8 @@ globalThis.PLANNER_CHAPTERS.push({
     {
       "id": "scene-4-51",
       "occurrenceKey": "loyalty-old-faith-wrath-late",
+      "onceKey": "loyalty-old-faith-wrath",
+      "locationVariant": "journey",
       "title": "Гнев Старой Веры",
       "type": "hidden",
       "appearance": {
