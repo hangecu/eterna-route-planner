@@ -98,7 +98,7 @@ if (!/\btarget="_blank"/i.test(supportLink) || !/\brel="[^"]*noopener[^"]*norefe
 if (!/<input\b[^>]*\bid="timelineSlider"[^>]*\btype="range"/i.test(html) && !/<input\b[^>]*\btype="range"[^>]*\bid="timelineSlider"/i.test(html)) {
   fail("В index.html отсутствует нижний ползунок маршрута");
 }
-for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton", "headerToggleButton", "headerExpandButton", "technicalInfoDetails"]) {
+for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton", "currentChoiceHeaderButton", "headerToggleButton", "headerExpandButton", "technicalInfoDetails"]) {
   if (!new RegExp(`\\bid="${id}"`).test(html)) fail(`В index.html отсутствует элемент интерфейса ${id}`);
 }
 if (/timeline-(?:phase-overlay|center-line)/.test(html)) {
@@ -108,7 +108,8 @@ if (/\bid="(?:routeInfoButton|routeInfoPanel|attributeContext)"/.test(html)) {
   fail("В index.html остались удалённые элементы прежней шапки");
 }
 const currentChoiceButton = html.match(/<button\b[^>]*\bid="currentChoiceButton"[^>]*>/i)?.[0] || "";
-if (!/\baria-keyshortcuts="Home"/i.test(currentChoiceButton)) {
+const currentChoiceHeaderButton = html.match(/<button\b[^>]*\bid="currentChoiceHeaderButton"[^>]*>/i)?.[0] || "";
+if (!/\baria-keyshortcuts="Home"/i.test(currentChoiceButton) || !/\baria-keyshortcuts="Home"/i.test(currentChoiceHeaderButton)) {
   fail("Для перехода к текущему выбору не указан хоткей Home");
 }
 const styles = read("assets/styles.css");
@@ -116,10 +117,10 @@ if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/i.test(styles)) {
   fail("В стилях не учтён системный режим уменьшенной анимации");
 }
 const appSource = read("js/app.js");
-for (const marker of ["timeline.position", "search.active", "sceneTypeBadge", "chapterLanguageSelect", "romanNumeral"]) {
+for (const marker of ["timeline.position", "search.active", "sceneTypeBadge", "chapterLanguageSelect", "romanNumeral", "updateCurrentNavigationVisibility"]) {
   if (!appSource.includes(marker)) fail(`js/app.js: отсутствует поддержка ${marker}`);
 }
-for (const marker of ["timeline-chapter-segment", "timeline-chapter-label", "scene-card.timeline-current::after"]) {
+for (const marker of ["timeline-chapter-segment", "timeline-chapter-label", "scene-card.timeline-current::after", "header-current-button", "contextual-visible"]) {
   if (!styles.includes(marker)) fail(`assets/styles.css: отсутствует оформление ${marker}`);
 }
 for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {

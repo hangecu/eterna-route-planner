@@ -74,6 +74,8 @@
   let timelineScrollFrame = 0;
   let timelineSliderFrame = 0;
   let updateTimelineScrollbar = () => {};
+  let currentNavigationVisible = false;
+  let currentNavigationReady = false;
   let toolsMenuOpen = false;
   let headerCollapsed = Boolean(saved.ui?.headerCollapsed);
   let choiceHistoryOpen = false;
@@ -1592,7 +1594,13 @@
     collectBindings = false;
     hydrateTimelineElements();
     refreshTimeline(0, false);
-    requestAnimationFrame(() => scrollToCurrent("auto"));
+    requestAnimationFrame(() => {
+      scrollToCurrent("auto");
+      requestAnimationFrame(() => {
+        currentNavigationReady = true;
+        updateCurrentNavigationVisibility();
+      });
+    });
   }
 
   function updateRequirementGroups(choiceElement, availability) {
@@ -1743,17 +1751,20 @@
       available: replayResult.availableScenes, total: planningSceneItems.length
     });
     $("#appVersion").textContent = APP_VERSION;
-    const currentChoiceButton = $("#currentChoiceButton");
-    currentChoiceButton.classList.toggle("visible", Boolean(currentItem));
     const currentButtonTitle = currentItem
       ? t("header.currentChapterTitle", { chapter: CHAPTER_NAMES[currentItem.chapter.id] || currentItem.chapter.id })
       : t("header.currentTitle");
-    currentChoiceButton.title = currentButtonTitle;
-    currentChoiceButton.setAttribute("aria-label", currentButtonTitle);
+    for (const currentChoiceButton of [$("#currentChoiceButton"), $("#currentChoiceHeaderButton")]) {
+      currentChoiceButton.title = currentButtonTitle;
+      currentChoiceButton.setAttribute("aria-label", currentButtonTitle);
+    }
     renderAttributeBar();
     updateHiddenScenesButton();
     if (panelOpen) renderPanel(panelMode);
-    requestAnimationFrame(updateTimelineScrollbar);
+    requestAnimationFrame(() => {
+      updateTimelineScrollbar();
+      updateCurrentNavigationVisibility();
+    });
   }
 
   function changedStateRows() {
@@ -2348,7 +2359,10 @@
         const eased = smoothScrollProgress(progress);
         viewport.scrollLeft = start + distance * eased;
         if (progress < 1) timelineScrollFrame = requestAnimationFrame(step);
-        else timelineScrollFrame = 0;
+        else {
+          timelineScrollFrame = 0;
+          updateCurrentNavigationVisibility();
+        }
       };
       timelineScrollFrame = requestAnimationFrame(step);
     } else {
@@ -2378,6 +2392,40 @@
       chapter: CHAPTER_NAMES[item.chapter.id] || item.chapter.id,
       scene: sceneName(item.scene)
     });
+  }
+
+  function setCurrentNavigationVisible(visible) {
+    currentNavigationVisible = Boolean(visible);
+    $("#currentChoiceHeaderButton").classList.toggle("contextual-visible", currentNavigationVisible);
+    $("#currentChoiceButton").classList.toggle("contextual-visible", currentNavigationVisible);
+  }
+
+  function updateCurrentNavigationVisibility() {
+    if (!currentNavigationReady) return;
+    const currentItem = replayResult?.currentSceneKey
+      ? flatScenes.find(item => item.key === replayResult.currentSceneKey)
+      : null;
+    if (!currentItem) {
+      setCurrentNavigationVisible(false);
+      return;
+    }
+    if ($("#search").value.trim()) {
+      setCurrentNavigationVisible(true);
+      return;
+    }
+    if (timelineScrollFrame || autoScrollFrame) return;
+    const card = sceneElements.get(currentItem.key);
+    const viewport = $("#timelineViewport");
+    if (!card || card.classList.contains("search-hidden") || card.closest(".chapter")?.hidden) {
+      setCurrentNavigationVisible(true);
+      return;
+    }
+    const viewportRect = viewport.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const visibleWidth = Math.max(0, Math.min(cardRect.right, viewportRect.right) - Math.max(cardRect.left, viewportRect.left));
+    const visibleRatio = cardRect.width > 0 ? visibleWidth / cardRect.width : 0;
+    const shouldShow = currentNavigationVisible ? visibleRatio < .7 : visibleRatio < .35;
+    setCurrentNavigationVisible(shouldShow);
   }
 
   function scheduleAutoScroll(targetItem) {
@@ -2451,7 +2499,10 @@
     $("#searchModeText").textContent = query ? t("search.active", { query: rawQuery }) : "";
     $("#searchModeCount").textContent = query ? t("search.found", { count: visible }) : "";
     $(".timeline-shell").classList.toggle("search-active", Boolean(query));
-    requestAnimationFrame(updateTimelineScrollbar);
+    requestAnimationFrame(() => {
+      updateTimelineScrollbar();
+      updateCurrentNavigationVisibility();
+    });
   }
 
   function clearSearch() {
@@ -2463,7 +2514,7 @@
   function goToCurrentChoice() {
     clearSearch();
     openToolsMenu(false);
-    scrollToCurrent("smooth");
+    scrollToCurrent("quick");
   }
 
   function openToolsMenu(open) {
@@ -2481,6 +2532,7 @@
       openToolsMenu(false);
     }
     $("#attributeBar").classList.toggle("collapsed", headerCollapsed);
+    $(".app").classList.toggle("header-collapsed", headerCollapsed);
     const collapseButton = $("#headerToggleButton");
     const expandButton = $("#headerExpandButton");
     collapseButton.setAttribute("aria-expanded", String(!headerCollapsed));
@@ -2529,6 +2581,7 @@
       if (file) void importRouteFile(file);
     });
     $("#currentChoiceButton").addEventListener("click", goToCurrentChoice);
+    $("#currentChoiceHeaderButton").addEventListener("click", goToCurrentChoice);
     $("#closePanel").addEventListener("click", () => openPanel(false));
     $("#backdrop").addEventListener("click", () => openPanel(false));
     $("#closeChoiceHistory").addEventListener("click", () => setChoiceHistoryOpen(false));
@@ -2755,13 +2808,19 @@
       timelineScrollbar.classList.add("interacting");
     });
     const timelineResizeObserver = globalThis.ResizeObserver
-      ? new ResizeObserver(() => updateTimelineSlider(true))
+      ? new ResizeObserver(() => {
+          updateTimelineSlider(true);
+          updateCurrentNavigationVisibility();
+        })
       : null;
     if (timelineResizeObserver) {
       timelineResizeObserver.observe(timelineViewport);
       timelineResizeObserver.observe($("#timeline"));
     } else {
-      globalThis.addEventListener("resize", () => updateTimelineSlider(true));
+      globalThis.addEventListener("resize", () => {
+        updateTimelineSlider(true);
+        updateCurrentNavigationVisibility();
+      });
     }
     requestAnimationFrame(() => updateTimelineSlider(true));
     $("#timelineViewport").addEventListener("pointerdown", cancelTimelineScrollAnimation, { passive: true });
@@ -2776,6 +2835,7 @@
       if (scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
         scrollFrame = 0;
+        updateCurrentNavigationVisibility();
         const viewportLeft = $("#timelineViewport").getBoundingClientRect().left + 90;
         let detected = 1;
         document.querySelectorAll(".chapter:not([hidden])").forEach(chapter => {
@@ -2793,7 +2853,7 @@
     document.addEventListener("keydown", event => {
       const target = event.target;
       const editingText = target instanceof HTMLElement && (
-        target.matches("input, textarea, select") || target.isContentEditable
+        target.matches('input:not([type="range"]), textarea, select') || target.isContentEditable
       );
       const overlayOpen = routeFileOpen || choiceHistoryOpen || panelOpen;
       if (event.key === "Home" && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !editingText && !overlayOpen) {

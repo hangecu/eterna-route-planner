@@ -61,6 +61,10 @@
               </div>
             </div>
           </div>
+          <button id="currentChoiceHeaderButton" class="header-current-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
+            <span class="control-icon" aria-hidden="true">◎</span>
+            <span class="control-label" data-i18n="header.current">К текущему</span>
+          </button>
           <button id="headerToggleButton" class="header-collapse-button" type="button" aria-label="Свернуть панель" aria-controls="attributeBar" aria-expanded="true" title="Свернуть панель" data-i18n-aria-label="header.collapse" data-i18n-title="header.collapse">
             <span class="control-icon" aria-hidden="true">▲</span>
             <span class="control-label" data-i18n="header.collapse">Свернуть панель</span>
@@ -71,16 +75,16 @@
       <div id="attributeGroups" class="attribute-groups"></div>
     </div>
     <div class="timeline-shell">
+      <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
+        <span class="current-choice-icon" aria-hidden="true">◎</span>
+        <span class="current-choice-label" data-i18n="header.current">К текущему</span>
+      </button>
       <div class="timeline-top-controls">
         <div id="searchModeBar" class="search-mode-bar" aria-live="polite" hidden>
           <span id="searchModeText" class="search-mode-text"></span>
           <span id="searchModeCount" class="search-mode-count"></span>
           <button id="clearSearchButton" type="button" title="Выйти из режима поиска" data-i18n="search.exit" data-i18n-title="search.exitTitle">Выйти</button>
         </div>
-        <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
-          <span class="current-choice-icon" aria-hidden="true">◎</span>
-          <span class="current-choice-label" data-i18n="header.current">К текущему</span>
-        </button>
       </div>
       <main id="timelineViewport" class="timeline-viewport">
         <div id="timeline" class="timeline"></div>
