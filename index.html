@@ -13,29 +13,54 @@
 <body>
   <div class="app">
     <div id="attributeBar" class="attribute-bar">
-      <button id="headerToggleButton" class="compact-control-button header-toggle-button" type="button" aria-label="Скрыть шапку" aria-expanded="true" title="Скрыть шапку" data-i18n-aria-label="header.hide" data-i18n-title="header.hide">⌃</button>
+      <button id="headerToggleButton" class="header-toggle-button" type="button" aria-label="Скрыть характеристики" aria-expanded="true" title="Скрыть характеристики" data-i18n-aria-label="header.hide" data-i18n-title="header.hide">
+        <span class="header-toggle-icon" aria-hidden="true">▲</span>
+        <span class="header-toggle-label" data-i18n="header.hide">Скрыть характеристики</span>
+      </button>
       <div class="attribute-sidebar">
         <div class="attribute-controls">
-          <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору" data-i18n="header.current" data-i18n-title="header.currentTitle">К текущему</button>
+          <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
+            <span class="current-choice-icon" aria-hidden="true">◎</span>
+            <span class="current-choice-label" data-i18n="header.current">К текущему</span>
+          </button>
           <div class="tools-menu-wrap">
-            <button id="toolsMenuButton" class="compact-control-button" type="button" aria-label="Инструменты" aria-controls="toolsMenu" aria-expanded="false" title="Инструменты" data-i18n-aria-label="tools.title" data-i18n-title="tools.title">☰</button>
+            <button id="toolsMenuButton" class="compact-control-button labeled-control-button" type="button" aria-label="Инструменты" aria-controls="toolsMenu" aria-expanded="false" title="Инструменты" data-i18n-aria-label="tools.title" data-i18n-title="tools.title">
+              <span class="control-icon" aria-hidden="true">☰</span>
+              <span class="control-label" data-i18n="tools.menuButton">Меню</span>
+            </button>
             <div id="toolsMenu" class="tools-menu" aria-hidden="true">
-              <input id="search" class="search" type="search" placeholder="Найти сцену или выбор…" autocomplete="off" data-i18n-placeholder="tools.search">
-              <span id="searchSummary" class="search-summary"></span>
-              <select id="languageSelect" aria-label="Язык / Language"></select>
-              <select id="chapterJump" aria-label="Перейти к главе" data-i18n-aria-label="tools.chapter"></select>
-              <button id="hiddenScenesButton" type="button" data-i18n="tools.hidden">Скрытые сцены</button>
-              <button id="stateButton" type="button" data-i18n="tools.state">Состояние</button>
-              <button id="routeFileButton" type="button" data-i18n="tools.routeFile">Маршрут: сохранить / загрузить</button>
-              <a id="supportLink" class="support-link" href="https://web.tribute.tg/d/Ps8" target="_blank" rel="noopener noreferrer external" data-i18n="tools.support" data-i18n-title="tools.supportTitle">Поддержать · ₽ ↗</a>
-              <button id="resetButton" class="danger" type="button" data-i18n="tools.reset">Сбросить выборы</button>
+              <div class="tools-group">
+                <span class="tools-group-title" data-i18n="tools.navigationGroup">Навигация</span>
+                <input id="search" class="search" type="search" placeholder="Найти сцену или выбор…" autocomplete="off" data-i18n-placeholder="tools.search">
+                <span id="searchSummary" class="search-summary"></span>
+                <select id="chapterJump" aria-label="Перейти к главе" data-i18n-aria-label="tools.chapter"></select>
+              </div>
+              <div class="tools-group">
+                <span class="tools-group-title" data-i18n="tools.routeGroup">Маршрут</span>
+                <button id="hiddenScenesButton" type="button" data-i18n="tools.hidden">Скрытые сцены</button>
+                <button id="stateButton" type="button" data-i18n="tools.state">Состояние</button>
+                <button id="routeFileButton" type="button" data-i18n="tools.routeFile">Маршрут: сохранить / загрузить</button>
+              </div>
+              <div class="tools-group">
+                <span class="tools-group-title" data-i18n="tools.projectGroup">Проект</span>
+                <select id="languageSelect" aria-label="Язык / Language"></select>
+                <a id="supportLink" class="support-link" href="https://web.tribute.tg/d/Ps8" target="_blank" rel="noopener noreferrer external" data-i18n="tools.support" data-i18n-title="tools.supportTitle">Поддержать · ₽ ↗</a>
+              </div>
+              <div class="tools-danger-zone">
+                <button id="resetButton" class="danger" type="button" data-i18n="tools.reset">Сбросить выборы</button>
+              </div>
             </div>
           </div>
           <div class="route-info-wrap">
-            <button id="routeInfoButton" class="compact-control-button" type="button" aria-label="Сводка и обозначения" aria-controls="routeInfoPanel" aria-expanded="false" title="Сводка и обозначения" data-i18n-aria-label="routeInfo.title" data-i18n-title="routeInfo.title">?</button>
+            <button id="routeInfoButton" class="compact-control-button labeled-control-button" type="button" aria-label="Сводка и обозначения" aria-controls="routeInfoPanel" aria-expanded="false" title="Сводка и обозначения" data-i18n-aria-label="routeInfo.title" data-i18n-title="routeInfo.title">
+              <span class="control-icon" aria-hidden="true">?</span>
+              <span class="control-label" data-i18n="routeInfo.button">Сводка</span>
+            </button>
             <div id="routeInfoPanel" class="route-info-panel" aria-hidden="true">
               <span class="route-info-title" data-i18n="routeInfo.route">Маршрут</span>
               <span id="summary" class="route-summary" data-i18n="routeInfo.loading">Загрузка…</span>
+              <span class="route-info-title" data-i18n="routeInfo.version">Версия</span>
+              <span id="appVersion" class="app-version">0.9.3-beta</span>
               <span class="route-info-title" data-i18n="routeInfo.legend">Обозначения</span>
               <div class="legend" aria-hidden="true">
                 <span data-i18n="routeInfo.available">доступно</span>
@@ -51,11 +76,24 @@
       <div id="attributeGroups" class="attribute-groups"></div>
     </div>
     <div class="timeline-shell">
+      <div id="searchModeBar" class="search-mode-bar" aria-live="polite" hidden>
+        <span id="searchModeText" class="search-mode-text"></span>
+        <span id="searchModeCount" class="search-mode-count"></span>
+        <button id="clearSearchButton" type="button" title="Выйти из режима поиска" data-i18n="search.exit" data-i18n-title="search.exitTitle">Выйти</button>
+      </div>
       <div class="timeline-phase-overlay" aria-hidden="true"><span data-i18n="timeline.past">Сделанные выборы</span><span data-i18n="timeline.current">Текущий</span><span data-i18n="timeline.future">Впереди</span></div>
       <div class="timeline-center-line" aria-hidden="true"></div>
       <main id="timelineViewport" class="timeline-viewport">
         <div id="timeline" class="timeline"></div>
       </main>
+      <div id="timelineScrollbar" class="timeline-scrollbar">
+        <div class="timeline-slider-track-overlay" aria-hidden="true">
+          <div id="timelineSliderMarkers" class="timeline-slider-markers"></div>
+          <span id="timelineCurrentMarker" class="timeline-current-marker" hidden></span>
+        </div>
+        <output id="timelineSliderTooltip" class="timeline-slider-tooltip" aria-hidden="true"></output>
+        <input id="timelineSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Прокрутка маршрута" data-i18n-aria-label="timeline.scrollbar">
+      </div>
     </div>
   </div>
 

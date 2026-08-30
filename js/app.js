@@ -14,6 +14,7 @@
   const ROUTE_FILES = globalThis.ETERNA_ROUTE_FILES;
   const t = I18N.t;
   const APP_NAME = t("app.name");
+  const APP_VERSION = payload.app?.version || "";
   const GAME_NAME = "The Life and Suffering of Prince Jerian";
   const SUPPORT_URLS = Object.freeze({
     ru: "https://web.tribute.tg/d/Ps8",
@@ -56,6 +57,8 @@
   let routeNoticeTimer = 0;
   let autoScrollFrame = 0;
   let timelineScrollFrame = 0;
+  let timelineSliderFrame = 0;
+  let updateTimelineScrollbar = () => {};
   let toolsMenuOpen = false;
   let routeInfoOpen = false;
   let headerCollapsed = Boolean(saved.ui?.headerCollapsed);
@@ -1072,23 +1075,63 @@
     }).join("; ");
   }
 
-  function effectLineHtml(effect, transition = "", options = {}) {
+  function effectCopyLine(text, transition = "", className = "") {
     const transitionMarkup = transition
       ? ` <span class="effect-transition">(${escapeHtml(transition)})</span>`
       : "";
+    const classes = `effect-line${className ? ` ${className}` : ""}`;
+    return `<div class="${classes}"><span>${escapeHtml(text)}${transitionMarkup}</span></div>`;
+  }
+
+  function characterEffectLines(effect, options = {}) {
+    const character = label(effect.character);
+    const lines = [];
+    if (effect.value) {
+      let transition = "";
+      if (options.before && options.after) {
+        const key = referenceKey(effect.character);
+        const before = options.before.relations[key] ?? 0;
+        const after = options.after.relations[key] ?? 0;
+        if (before !== after) transition = `${before} → ${after}`;
+      }
+      lines.push(effectCopyLine(
+        `${character}: ${t("effect.relationShort", { value: sign(effect.value) })}`,
+        transition,
+        effectClass(effect)
+      ));
+    }
+    if (effect.status) {
+      let transition = "";
+      if (effect.statusGroup && options.before && options.after) {
+        const before = statusStateLabel(options.before, effect);
+        const after = statusStateLabel(options.after, effect);
+        if (before !== after) transition = `${before} → ${after}`;
+      }
+      const status = effect.statusGroup
+        ? t("effect.status", { status: label(effect.status) })
+        : t("effect.extraStatus", { status: label(effect.status) });
+      lines.push(effectCopyLine(`${character}: ${status}`, transition));
+    }
+    return lines.join("");
+  }
+
+  function effectLineHtml(effect, transition = "", options = {}) {
     const customText = options.text || effectText(effect);
     if (options.payment) {
-      return `<div class="effect-line negative payment-effect"><span>${escapeHtml(customText)}${transitionMarkup}</span></div>`;
+      return effectCopyLine(customText, transition, "negative payment-effect");
     }
-      const record = effect.type === "flag" ? (entity(effect.objective) || {}) : null;
-      if (effect.type === "flag" && !record.auxiliary) {
-        const kind = t(effect.unlocked ? "effect.achievement" : "effect.achievementClosed");
-        return `<div class="effect-line achievement"><span class="achievement-copy">
-          <span class="achievement-kind">${escapeHtml(kind)}</span>
-          <span class="achievement-title">${escapeHtml(label(effect.objective))}</span>
-        </span></div>`;
-      }
-    return `<div class="effect-line ${effectClass(effect)}"><span>${escapeHtml(customText)}${transitionMarkup}</span></div>`;
+    if (effect.type === "character" && effect.value && effect.status) {
+      return characterEffectLines(effect, options);
+    }
+    const record = effect.type === "flag" ? (entity(effect.objective) || {}) : null;
+    if (effect.type === "flag" && !record.auxiliary) {
+      const kind = t(effect.unlocked ? "effect.achievement" : "effect.achievementClosed");
+      return `<div class="effect-line achievement"><span class="achievement-copy">
+        <span class="achievement-kind">${escapeHtml(kind)}</span>
+        <span class="achievement-title">${escapeHtml(label(effect.objective))}</span>
+      </span></div>`;
+    }
+    return effectCopyLine(customText, transition, effectClass(effect));
   }
 
   function effectsHtml(effects, context = {}) {
@@ -1127,7 +1170,7 @@
       const transition = detailed ? transitionText(effect, before, working) : "";
       if (isLocationEffect(effect) && context.showLocationChange === false) continue;
       if (effectIsAuxiliary(effect) && (!isLocationEffect(effect) || !transition)) continue;
-      lines.push(effectLineHtml(effect, transition));
+      lines.push(effectLineHtml(effect, transition, { before, after: working }));
     }
     if (working) {
       if (context.settings?.applyCreedLoyalty) applyCreedChanges(working);
@@ -1254,10 +1297,11 @@
     if (scene.locationVariant) variants.push(t(`scene.locationVariant.${scene.locationVariant}`));
     if (scene.variant) variants.push(t("scene.variant", { variant: scene.variant }));
     const variant = variants.map(text => `<div class="scene-variant">${escapeHtml(text)}</div>`).join("");
+    const typeBadge = sceneTypeBadge(scene);
     return `
       <article class="scene-card ${isRecurringScene(scene) ? "recurring-scene" : ""} ${result.available ? "" : "unavailable"} ${selected ? "has-selection" : ""}" data-scene-id="${escapeHtml(scene.id)}" data-scene-key="${escapeHtml(key)}">
         <div class="scene-topline">
-          <span class="type-badge">${escapeHtml(TYPE_NAMES[scene.type] || scene.type)}</span>
+          ${typeBadge ? `<span class="type-badge">${escapeHtml(typeBadge)}</span>` : ""}
           <span class="state-badge ${result.available ? "ok" : "no"}">${escapeHtml(t(result.available ? "scene.available" : "scene.unavailable"))}</span>
         </div>
         <h2 class="scene-id" title="${escapeHtml(scene.id)}">${escapeHtml(sceneName(scene))}</h2>
@@ -1306,6 +1350,12 @@
 
   function sceneName(scene) {
     return scene.title || scene.name || scene.id;
+  }
+
+  function sceneTypeBadge(scene) {
+    if (["scene", "text", "scene-no-choice"].includes(scene.type)) return "";
+    if (["hidden", "hidden-text", "hidden-no-choice"].includes(scene.type)) return TYPE_NAMES.hidden;
+    return TYPE_NAMES[scene.type] || scene.type;
   }
 
   // ── Панели состояния, поиск и навигация ────────────────────────────────
@@ -1665,10 +1715,12 @@
       valid: replayResult.validSelections, selected: totalSelected,
       available: replayResult.availableScenes, total: planningSceneItems.length
     });
+    $("#appVersion").textContent = APP_VERSION;
     $("#currentChoiceButton").classList.toggle("visible", Boolean(replayResult.currentSceneKey));
     renderAttributeBar();
     updateHiddenScenesButton();
     if (panelOpen) renderPanel(panelMode);
+    requestAnimationFrame(updateTimelineScrollbar);
   }
 
   function changedStateRows() {
@@ -2246,6 +2298,7 @@
     const card = targetItem && sceneElements.get(targetItem.key);
     const viewport = $("#timelineViewport");
     if (!card || card.classList.contains("search-hidden") || card.closest(".chapter")?.hidden) return null;
+    if (behavior !== "auto" && matchMedia("(prefers-reduced-motion: reduce)").matches) behavior = "auto";
     const viewportRect = viewport.getBoundingClientRect();
     const cardRect = card.getBoundingClientRect();
     const desired = clamp(
@@ -2279,6 +2332,21 @@
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const usedBehavior = reducedMotion ? "auto" : behavior;
     return scrollToItem(item, usedBehavior);
+  }
+
+  function visibleTimelineItems() {
+    return planningSceneItems.filter(item => {
+      const card = sceneElements.get(item.key);
+      return card && !card.classList.contains("search-hidden") && !card.closest(".chapter")?.hidden;
+    });
+  }
+
+  function timelinePositionLabel(item) {
+    if (!item) return t("timeline.scrollbar");
+    return t("timeline.position", {
+      chapter: CHAPTER_NAMES[item.chapter.id] || item.chapter.id,
+      scene: sceneName(item.scene)
+    });
   }
 
   function scheduleAutoScroll(targetItem) {
@@ -2335,7 +2403,8 @@
   }
 
   function applySearch() {
-    const query = I18N.lower($("#search").value.trim());
+    const rawQuery = $("#search").value.trim();
+    const query = I18N.lower(rawQuery);
     let visible = 0;
     document.querySelectorAll(".scene-card").forEach(card => {
       const haystack = I18N.lower(`${card.textContent} ${card.dataset.sceneId || ""}`);
@@ -2347,6 +2416,24 @@
       chapter.hidden = !chapter.querySelector(".scene-card:not(.search-hidden)");
     });
     $("#searchSummary").textContent = query ? t("search.found", { count: visible }) : "";
+    $("#searchModeBar").hidden = !query;
+    $("#searchModeText").textContent = query ? t("search.active", { query: rawQuery }) : "";
+    $("#searchModeCount").textContent = query ? t("search.found", { count: visible }) : "";
+    $(".timeline-shell").classList.toggle("search-active", Boolean(query));
+    requestAnimationFrame(updateTimelineScrollbar);
+  }
+
+  function clearSearch() {
+    if (!$("#search").value) return;
+    $("#search").value = "";
+    applySearch();
+  }
+
+  function goToCurrentChoice() {
+    clearSearch();
+    openToolsMenu(false);
+    openRouteInfo(false);
+    scrollToCurrent("smooth");
   }
 
   function openToolsMenu(open) {
@@ -2374,7 +2461,10 @@
     }
     $("#attributeBar").classList.toggle("collapsed", headerCollapsed);
     const button = $("#headerToggleButton");
-    button.textContent = headerCollapsed ? "⌄" : "⌃";
+    const icon = button.querySelector(".header-toggle-icon");
+    const copy = button.querySelector(".header-toggle-label");
+    if (icon) icon.textContent = headerCollapsed ? "▼" : "▲";
+    if (copy) copy.textContent = t(headerCollapsed ? "header.show" : "header.hide");
     button.setAttribute("aria-expanded", String(!headerCollapsed));
     button.setAttribute("aria-label", t(headerCollapsed ? "header.show" : "header.hide"));
     button.title = t(headerCollapsed ? "header.show" : "header.hide");
@@ -2392,11 +2482,13 @@
     ).join("");
     $("#chapterJump").addEventListener("change", event => {
       const target = document.getElementById(`chapter-${event.target.value}`);
-      if (target) target.scrollIntoView({ behavior: "smooth", inline: "start", block: "start" });
+      const behavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      if (target) target.scrollIntoView({ behavior, inline: "start", block: "start" });
       event.target.value = "";
       openToolsMenu(false);
     });
     $("#search").addEventListener("input", applySearch);
+    $("#clearSearchButton").addEventListener("click", clearSearch);
     $("#toolsMenuButton").addEventListener("click", () => openToolsMenu(!toolsMenuOpen));
     $("#routeInfoButton").addEventListener("click", () => openRouteInfo(!routeInfoOpen));
     $("#headerToggleButton").addEventListener("click", () => setHeaderCollapsed(!headerCollapsed));
@@ -2419,15 +2511,7 @@
       event.target.value = "";
       if (file) void importRouteFile(file);
     });
-    $("#currentChoiceButton").addEventListener("click", () => {
-      if ($("#search").value) {
-        $("#search").value = "";
-        applySearch();
-      }
-      openToolsMenu(false);
-      openRouteInfo(false);
-      scrollToCurrent("smooth");
-    });
+    $("#currentChoiceButton").addEventListener("click", goToCurrentChoice);
     $("#closePanel").addEventListener("click", () => openPanel(false));
     $("#backdrop").addEventListener("click", () => openPanel(false));
     $("#closeChoiceHistory").addEventListener("click", () => setChoiceHistoryOpen(false));
@@ -2502,7 +2586,8 @@
       if (goto) {
         const target = sceneElements.get(goto.dataset.gotoScene);
         openPanel(false);
-        if (target) target.scrollIntoView({ behavior: "smooth", inline: "center", block: "start" });
+        const behavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+        if (target) target.scrollIntoView({ behavior, inline: "center", block: "start" });
       }
     });
     $("#timelineViewport").addEventListener("wheel", event => {
@@ -2512,9 +2597,138 @@
         event.currentTarget.scrollLeft += event.deltaY;
       }
     }, { passive: false });
+    const timelineViewport = $("#timelineViewport");
+    const timelineSlider = $("#timelineSlider");
+    const timelineScrollbar = $("#timelineScrollbar");
+    const timelineSliderMarkers = $("#timelineSliderMarkers");
+    const timelineCurrentMarker = $("#timelineCurrentMarker");
+    const timelineSliderTooltip = $("#timelineSliderTooltip");
+    let sliderItemPositions = [];
+    let sliderLayoutMaximum = -1;
+
+    const scrollPositionForCard = card => {
+      const viewportRect = timelineViewport.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      return clamp(
+        timelineViewport.scrollLeft + cardRect.left - viewportRect.left + cardRect.width / 2 - timelineViewport.clientWidth / 2,
+        0,
+        Math.max(0, timelineViewport.scrollWidth - timelineViewport.clientWidth)
+      );
+    };
+
+    const itemNearestScrollPosition = scrollLeft => {
+      let nearest = null;
+      let nearestDistance = Infinity;
+      for (const entry of sliderItemPositions) {
+        const distance = Math.abs(entry.position - scrollLeft);
+        if (distance < nearestDistance) {
+          nearest = entry.item;
+          nearestDistance = distance;
+        }
+      }
+      return nearest;
+    };
+
+    const updateSliderDescription = (scrollLeft, maximum) => {
+      const item = itemNearestScrollPosition(scrollLeft);
+      const description = timelinePositionLabel(item);
+      const progress = maximum > 0 ? clamp(scrollLeft / maximum, 0, 1) * 100 : 0;
+      timelineSlider.setAttribute("aria-valuetext", description);
+      timelineSliderTooltip.textContent = description;
+      timelineScrollbar.style.setProperty("--timeline-tooltip-position", `${progress}%`);
+    };
+
+    const rebuildSliderLayout = maximum => {
+      sliderItemPositions = visibleTimelineItems().map(item => ({
+        item,
+        position: scrollPositionForCard(sceneElements.get(item.key))
+      }));
+      sliderLayoutMaximum = maximum;
+      const viewportRect = timelineViewport.getBoundingClientRect();
+      const visibleChapters = [...document.querySelectorAll(".chapter:not([hidden])")];
+      timelineSliderMarkers.innerHTML = visibleChapters.map(chapter => {
+        const absoluteLeft = timelineViewport.scrollLeft + chapter.getBoundingClientRect().left - viewportRect.left;
+        const position = maximum > 0 ? clamp(absoluteLeft / maximum, 0, 1) * 100 : 0;
+        return `<span class="timeline-chapter-marker" style="left:${position}%"></span>`;
+      }).join("");
+
+      const currentItem = replayResult?.currentSceneKey
+        ? flatScenes.find(item => item.key === replayResult.currentSceneKey)
+        : null;
+      const currentCard = currentItem && sceneElements.get(currentItem.key);
+      const currentVisible = currentCard && !currentCard.classList.contains("search-hidden") && !currentCard.closest(".chapter")?.hidden;
+      timelineCurrentMarker.hidden = !currentVisible;
+      if (currentVisible) {
+        const position = maximum > 0 ? clamp(scrollPositionForCard(currentCard) / maximum, 0, 1) * 100 : 0;
+        timelineCurrentMarker.style.setProperty("--timeline-current-position", `${position}%`);
+      }
+    };
+
+    const updateTimelineSlider = (refreshLayout = false) => {
+      const maximum = Math.max(0, timelineViewport.scrollWidth - timelineViewport.clientWidth);
+      timelineSlider.max = String(Math.ceil(maximum));
+      timelineSlider.value = String(clamp(Math.round(timelineViewport.scrollLeft), 0, Math.ceil(maximum)));
+      const progress = maximum > 0 ? clamp(timelineViewport.scrollLeft / maximum, 0, 1) * 100 : 0;
+      timelineSlider.style.setProperty("--timeline-progress", `${progress}%`);
+      timelineScrollbar.hidden = maximum < 2;
+      if (refreshLayout || Math.abs(sliderLayoutMaximum - maximum) > 1 || !sliderItemPositions.length) {
+        rebuildSliderLayout(maximum);
+      }
+      updateSliderDescription(timelineViewport.scrollLeft, maximum);
+    };
+    updateTimelineScrollbar = () => updateTimelineSlider(true);
+    timelineSlider.addEventListener("input", () => {
+      cancelTimelineScrollAnimation();
+      timelineViewport.scrollLeft = Number(timelineSlider.value);
+      timelineScrollbar.classList.add("interacting");
+      updateSliderDescription(Number(timelineSlider.value), Number(timelineSlider.max));
+    });
+    timelineSlider.addEventListener("change", () => timelineScrollbar.classList.remove("interacting"));
+    timelineSlider.addEventListener("blur", () => timelineScrollbar.classList.remove("interacting"));
+    timelineSlider.addEventListener("keydown", event => {
+      const direction = ["ArrowRight", "ArrowDown"].includes(event.key)
+        ? 1
+        : (["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 0);
+      const chapterDirection = event.key === "PageDown" ? 1 : (event.key === "PageUp" ? -1 : 0);
+      if (!direction && !chapterDirection) return;
+      const items = visibleTimelineItems();
+      if (!items.length) return;
+      event.preventDefault();
+      cancelTimelineScrollAnimation();
+      const currentItem = itemNearestScrollPosition(timelineViewport.scrollLeft) || items[0];
+      let target = currentItem;
+      if (direction) {
+        const index = items.indexOf(currentItem);
+        target = items[clamp(index + direction, 0, items.length - 1)];
+      } else {
+        const chapters = [...new Set(items.map(item => item.chapter.number))];
+        const chapterIndex = chapters.indexOf(currentItem.chapter.number);
+        const targetChapter = chapters[clamp(chapterIndex + chapterDirection, 0, chapters.length - 1)];
+        target = items.find(item => item.chapter.number === targetChapter) || currentItem;
+      }
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      scrollToItem(target, reducedMotion ? "auto" : "smooth");
+      timelineScrollbar.classList.add("interacting");
+    });
+    const timelineResizeObserver = globalThis.ResizeObserver
+      ? new ResizeObserver(() => updateTimelineSlider(true))
+      : null;
+    if (timelineResizeObserver) {
+      timelineResizeObserver.observe(timelineViewport);
+      timelineResizeObserver.observe($("#timeline"));
+    } else {
+      globalThis.addEventListener("resize", () => updateTimelineSlider(true));
+    }
+    requestAnimationFrame(() => updateTimelineSlider(true));
     $("#timelineViewport").addEventListener("pointerdown", cancelTimelineScrollAnimation, { passive: true });
     let scrollFrame = 0;
     $("#timelineViewport").addEventListener("scroll", () => {
+      if (!timelineSliderFrame) {
+        timelineSliderFrame = requestAnimationFrame(() => {
+          timelineSliderFrame = 0;
+          updateTimelineSlider();
+        });
+      }
       if (scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
         scrollFrame = 0;
@@ -2533,7 +2747,15 @@
       });
     }, { passive: true });
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && routeFileOpen) setRouteFileOpen(false);
+      const target = event.target;
+      const editingText = target instanceof HTMLElement && (
+        target.matches("input, textarea, select") || target.isContentEditable
+      );
+      const overlayOpen = routeFileOpen || choiceHistoryOpen || panelOpen;
+      if (event.key === "Home" && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !editingText && !overlayOpen) {
+        event.preventDefault();
+        goToCurrentChoice();
+      } else if (event.key === "Escape" && routeFileOpen) setRouteFileOpen(false);
       else if (event.key === "Escape" && choiceHistoryOpen) setChoiceHistoryOpen(false);
       else if (event.key === "Escape" && toolsMenuOpen) openToolsMenu(false);
       else if (event.key === "Escape" && routeInfoOpen) openRouteInfo(false);

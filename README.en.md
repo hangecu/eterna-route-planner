@@ -16,7 +16,7 @@ No installation is required. Extract the archive before opening the planner.
 
 ## Features
 
-- events and choices organized by chapter;
+- events and choices organized by chapter, with scene search and quick return to the current choice;
 - Russian and English interface;
 - visible conditions and consequences;
 - automatic route recalculation;

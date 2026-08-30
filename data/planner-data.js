@@ -15,6 +15,9 @@
   }
 
   globalThis.PLANNER_PAYLOAD = {
+    app: {
+      version: "0.9.3-beta"
+    },
     planner: {
       schemaVersion: 5,
       choiceSystems,

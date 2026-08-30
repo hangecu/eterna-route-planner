@@ -95,6 +95,24 @@ if (!supportLink) fail("В index.html отсутствует ссылка под
 if (!/\btarget="_blank"/i.test(supportLink) || !/\brel="[^"]*noopener[^"]*noreferrer[^"]*"/i.test(supportLink)) {
   fail("Ссылка поддержки должна безопасно открываться в новой вкладке");
 }
+if (!/<input\b[^>]*\bid="timelineSlider"[^>]*\btype="range"/i.test(html) && !/<input\b[^>]*\btype="range"[^>]*\bid="timelineSlider"/i.test(html)) {
+  fail("В index.html отсутствует нижний ползунок маршрута");
+}
+for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton"]) {
+  if (!new RegExp(`\\bid="${id}"`).test(html)) fail(`В index.html отсутствует элемент интерфейса ${id}`);
+}
+const currentChoiceButton = html.match(/<button\b[^>]*\bid="currentChoiceButton"[^>]*>/i)?.[0] || "";
+if (!/\baria-keyshortcuts="Home"/i.test(currentChoiceButton)) {
+  fail("Для перехода к текущему выбору не указан хоткей Home");
+}
+const styles = read("assets/styles.css");
+if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/i.test(styles)) {
+  fail("В стилях не учтён системный режим уменьшенной анимации");
+}
+const appSource = read("js/app.js");
+for (const marker of ["timeline.position", "search.active", "sceneTypeBadge"]) {
+  if (!appSource.includes(marker)) fail(`js/app.js: отсутствует поддержка ${marker}`);
+}
 for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
   const target = match[1];
   if (/^(?:https?:|data:|#)/i.test(target)) continue;
@@ -221,6 +239,12 @@ if (!payload?.planner || !payload?.metadata) {
 } else {
   const chapters = payload.planner.chapters;
   const entities = payload.metadata.entities;
+  const appVersion = payload.app?.version;
+  const staticVersion = html.match(/\bid="appVersion"[^>]*>([^<]+)</i)?.[1]?.trim();
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(appVersion || "")) {
+    fail("Не указана корректная версия приложения");
+  }
+  if (staticVersion !== appVersion) fail("Версия приложения в сводке не совпадает с данными проекта");
   checkPublicStrings(payload);
   if (!Array.isArray(chapters) || chapters.length !== 5) fail("Ожидалось пять глав с планируемыми событиями");
   if (!entities || typeof entities !== "object") fail("Не загружен справочник состояний");
