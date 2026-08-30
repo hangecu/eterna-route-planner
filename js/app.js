@@ -37,6 +37,21 @@
   const sign = value => Number(value) > 0 ? `+${value}` : String(value);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const referenceKey = reference => reference && reference.key;
+  const romanNumeral = value => {
+    const digits = [
+      [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"],
+      [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+    ];
+    let number = Math.max(1, Math.floor(Number(value) || 1));
+    let result = "";
+    for (const [amount, numeral] of digits) {
+      while (number >= amount) {
+        result += numeral;
+        number -= amount;
+      }
+    }
+    return result;
+  };
 
   let saved = { selections: {} };
   try {
@@ -1557,13 +1572,29 @@
       const scenes = items.map(item => sceneHtml(item)).join("");
       const firstChapterBrand = chapter.number === 1 ? `
         <span class="chapter-brand-inline"><strong>${escapeHtml(APP_NAME)}</strong><small>${escapeHtml(t("app.tagline", { game: GAME_NAME }))}</small></span>` : "";
+      const languageControl = chapter.number === 1 ? `
+        <label class="chapter-language-control">
+          <span>${escapeHtml(t("language.interface"))}</span>
+          <select id="chapterLanguageSelect" data-language-select aria-label="${escapeHtml(t("language.interface"))}"></select>
+        </label>` : "";
       return `
         <section class="chapter" id="chapter-${chapter.number}" data-chapter="${chapter.number}">
-          <div class="chapter-heading ${chapter.number === 1 ? "first-chapter-heading" : ""}">${firstChapterBrand}${escapeHtml(CHAPTER_NAMES[chapter.id] || chapter.id)}</div>
+          <header class="chapter-heading ${chapter.number === 1 ? "first-chapter-heading" : ""}">
+            ${firstChapterBrand}
+            <span class="chapter-title-row"><span class="chapter-number" aria-hidden="true">${romanNumeral(chapter.number)}</span><strong>${escapeHtml(CHAPTER_NAMES[chapter.id] || chapter.id)}</strong></span>
+            ${languageControl}
+          </header>
           <div class="chapter-scenes">${scenes}</div>
         </section>`;
     }).join("");
     $("#timeline").innerHTML = chapters;
+    const chapterLanguageSelect = $("#chapterLanguageSelect");
+    const menuLanguageSelect = $("#languageSelect");
+    if (chapterLanguageSelect && menuLanguageSelect) {
+      chapterLanguageSelect.innerHTML = menuLanguageSelect.innerHTML;
+      chapterLanguageSelect.value = I18N.locale;
+      chapterLanguageSelect.addEventListener("change", () => I18N.changeLocale(chapterLanguageSelect.value));
+    }
     collectBindings = false;
     hydrateTimelineElements();
     refreshTimeline(0, false);
@@ -1610,6 +1641,8 @@
       sceneElement.classList.toggle("timeline-past", itemIndex < currentIndex);
       sceneElement.classList.toggle("timeline-current", itemIndex === currentIndex);
       sceneElement.classList.toggle("timeline-future", itemIndex > currentIndex);
+      if (itemIndex === currentIndex) sceneElement.setAttribute("aria-current", "step");
+      else sceneElement.removeAttribute("aria-current");
       if (item.flatIndex < fromIndex && !isRecurringScene(item.scene)) continue;
       const hasSelection = selections[item.key] != null;
       const automaticEffects = effectsHtml(item.scene.effects, {
@@ -2460,14 +2493,10 @@
       openRouteInfo(false);
     }
     $("#attributeBar").classList.toggle("collapsed", headerCollapsed);
-    const button = $("#headerToggleButton");
-    const icon = button.querySelector(".header-toggle-icon");
-    const copy = button.querySelector(".header-toggle-label");
-    if (icon) icon.textContent = headerCollapsed ? "▼" : "▲";
-    if (copy) copy.textContent = t(headerCollapsed ? "header.show" : "header.hide");
-    button.setAttribute("aria-expanded", String(!headerCollapsed));
-    button.setAttribute("aria-label", t(headerCollapsed ? "header.show" : "header.hide"));
-    button.title = t(headerCollapsed ? "header.show" : "header.hide");
+    const collapseButton = $("#headerToggleButton");
+    const expandButton = $("#headerExpandButton");
+    collapseButton.setAttribute("aria-expanded", String(!headerCollapsed));
+    expandButton.setAttribute("aria-expanded", String(!headerCollapsed));
     if (persist) save();
   }
 
@@ -2491,7 +2520,8 @@
     $("#clearSearchButton").addEventListener("click", clearSearch);
     $("#toolsMenuButton").addEventListener("click", () => openToolsMenu(!toolsMenuOpen));
     $("#routeInfoButton").addEventListener("click", () => openRouteInfo(!routeInfoOpen));
-    $("#headerToggleButton").addEventListener("click", () => setHeaderCollapsed(!headerCollapsed));
+    $("#headerToggleButton").addEventListener("click", () => setHeaderCollapsed(true));
+    $("#headerExpandButton").addEventListener("click", () => setHeaderCollapsed(false));
     $("#hiddenScenesButton").addEventListener("click", () => {
       openToolsMenu(false);
       openPanel(true, "hidden");
@@ -2644,12 +2674,20 @@
         position: scrollPositionForCard(sceneElements.get(item.key))
       }));
       sliderLayoutMaximum = maximum;
-      const viewportRect = timelineViewport.getBoundingClientRect();
       const visibleChapters = [...document.querySelectorAll(".chapter:not([hidden])")];
-      timelineSliderMarkers.innerHTML = visibleChapters.map(chapter => {
-        const absoluteLeft = timelineViewport.scrollLeft + chapter.getBoundingClientRect().left - viewportRect.left;
-        const position = maximum > 0 ? clamp(absoluteLeft / maximum, 0, 1) * 100 : 0;
-        return `<span class="timeline-chapter-marker" style="left:${position}%"></span>`;
+      const chapterRanges = visibleChapters.map(chapter => {
+        const heading = chapter.querySelector(".chapter-heading");
+        const scrollPosition = heading ? scrollPositionForCard(heading) : 0;
+        return {
+          number: Number(chapter.dataset.chapter),
+          position: maximum > 0 ? clamp(scrollPosition / maximum, 0, 1) * 100 : 0
+        };
+      });
+      timelineSliderMarkers.innerHTML = chapterRanges.map((chapter, index) => {
+        const end = chapterRanges[index + 1]?.position ?? 100;
+        const width = Math.max(0, end - chapter.position);
+        const lastClass = index === chapterRanges.length - 1 ? " is-last" : "";
+        return `<span class="timeline-chapter-segment${lastClass}" style="left:${chapter.position}%;width:${width}%"><span class="timeline-chapter-label">${romanNumeral(chapter.number)}</span></span><span class="timeline-chapter-marker" style="left:${chapter.position}%"></span>`;
       }).join("");
 
       const currentItem = replayResult?.currentSceneKey

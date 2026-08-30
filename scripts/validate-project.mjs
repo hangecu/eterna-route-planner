@@ -98,8 +98,11 @@ if (!/\btarget="_blank"/i.test(supportLink) || !/\brel="[^"]*noopener[^"]*norefe
 if (!/<input\b[^>]*\bid="timelineSlider"[^>]*\btype="range"/i.test(html) && !/<input\b[^>]*\btype="range"[^>]*\bid="timelineSlider"/i.test(html)) {
   fail("В index.html отсутствует нижний ползунок маршрута");
 }
-for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton"]) {
+for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton", "headerToggleButton", "headerExpandButton"]) {
   if (!new RegExp(`\\bid="${id}"`).test(html)) fail(`В index.html отсутствует элемент интерфейса ${id}`);
+}
+if (/timeline-(?:phase-overlay|center-line)/.test(html)) {
+  fail("В index.html остались прежние неподвижные обозначения текущей сцены");
 }
 const currentChoiceButton = html.match(/<button\b[^>]*\bid="currentChoiceButton"[^>]*>/i)?.[0] || "";
 if (!/\baria-keyshortcuts="Home"/i.test(currentChoiceButton)) {
@@ -110,8 +113,11 @@ if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/i.test(styles)) {
   fail("В стилях не учтён системный режим уменьшенной анимации");
 }
 const appSource = read("js/app.js");
-for (const marker of ["timeline.position", "search.active", "sceneTypeBadge"]) {
+for (const marker of ["timeline.position", "search.active", "sceneTypeBadge", "chapterLanguageSelect", "romanNumeral"]) {
   if (!appSource.includes(marker)) fail(`js/app.js: отсутствует поддержка ${marker}`);
+}
+for (const marker of ["timeline-chapter-segment", "timeline-chapter-label", "scene-card.timeline-current::after"]) {
+  if (!styles.includes(marker)) fail(`assets/styles.css: отсутствует оформление ${marker}`);
 }
 for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
   const target = match[1];

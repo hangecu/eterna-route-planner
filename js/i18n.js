@@ -120,9 +120,9 @@
       element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
     }
 
-    const languageSelect = document.querySelector("#languageSelect");
-    if (languageSelect) {
-      languageSelect.setAttribute("aria-label", t("language.label"));
+    const languageSelects = document.querySelectorAll("[data-language-select]");
+    for (const languageSelect of languageSelects) {
+      languageSelect.setAttribute("aria-label", t("language.interface"));
       languageSelect.innerHTML = supported.map(code => {
         const language = registry.languages[code];
         const option = document.createElement("option");

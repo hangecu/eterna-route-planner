@@ -13,16 +13,11 @@
 <body>
   <div class="app">
     <div id="attributeBar" class="attribute-bar">
-      <button id="headerToggleButton" class="header-toggle-button" type="button" aria-label="Скрыть характеристики" aria-expanded="true" title="Скрыть характеристики" data-i18n-aria-label="header.hide" data-i18n-title="header.hide">
-        <span class="header-toggle-icon" aria-hidden="true">▲</span>
-        <span class="header-toggle-label" data-i18n="header.hide">Скрыть характеристики</span>
+      <button id="headerExpandButton" class="header-expand-button" type="button" aria-label="Развернуть панель" aria-controls="attributeBar" aria-expanded="false" title="Развернуть панель" data-i18n-aria-label="header.expand" data-i18n-title="header.expand">
+        <span aria-hidden="true">▼</span>
       </button>
       <div class="attribute-sidebar">
         <div class="attribute-controls">
-          <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
-            <span class="current-choice-icon" aria-hidden="true">◎</span>
-            <span class="current-choice-label" data-i18n="header.current">К текущему</span>
-          </button>
           <div class="tools-menu-wrap">
             <button id="toolsMenuButton" class="compact-control-button labeled-control-button" type="button" aria-label="Инструменты" aria-controls="toolsMenu" aria-expanded="false" title="Инструменты" data-i18n-aria-label="tools.title" data-i18n-title="tools.title">
               <span class="control-icon" aria-hidden="true">☰</span>
@@ -43,7 +38,7 @@
               </div>
               <div class="tools-group">
                 <span class="tools-group-title" data-i18n="tools.projectGroup">Проект</span>
-                <select id="languageSelect" aria-label="Язык / Language"></select>
+                <select id="languageSelect" data-language-select aria-label="Язык интерфейса"></select>
                 <a id="supportLink" class="support-link" href="https://web.tribute.tg/d/Ps8" target="_blank" rel="noopener noreferrer external" data-i18n="tools.support" data-i18n-title="tools.supportTitle">Поддержать · ₽ ↗</a>
               </div>
               <div class="tools-danger-zone">
@@ -69,6 +64,10 @@
               </div>
             </div>
           </div>
+          <button id="headerToggleButton" class="header-collapse-button" type="button" aria-label="Свернуть панель" aria-controls="attributeBar" aria-expanded="true" title="Свернуть панель" data-i18n-aria-label="header.collapse" data-i18n-title="header.collapse">
+            <span class="control-icon" aria-hidden="true">▲</span>
+            <span class="control-label" data-i18n="header.collapse">Свернуть панель</span>
+          </button>
         </div>
         <div id="attributeContext" class="attribute-context"></div>
         <span id="routeNotice" class="route-notice" role="status" aria-live="polite"></span>
@@ -76,13 +75,17 @@
       <div id="attributeGroups" class="attribute-groups"></div>
     </div>
     <div class="timeline-shell">
-      <div id="searchModeBar" class="search-mode-bar" aria-live="polite" hidden>
-        <span id="searchModeText" class="search-mode-text"></span>
-        <span id="searchModeCount" class="search-mode-count"></span>
-        <button id="clearSearchButton" type="button" title="Выйти из режима поиска" data-i18n="search.exit" data-i18n-title="search.exitTitle">Выйти</button>
+      <div class="timeline-top-controls">
+        <div id="searchModeBar" class="search-mode-bar" aria-live="polite" hidden>
+          <span id="searchModeText" class="search-mode-text"></span>
+          <span id="searchModeCount" class="search-mode-count"></span>
+          <button id="clearSearchButton" type="button" title="Выйти из режима поиска" data-i18n="search.exit" data-i18n-title="search.exitTitle">Выйти</button>
+        </div>
+        <button id="currentChoiceButton" class="current-choice-button" type="button" title="Перейти к текущему выбору (Home)" aria-keyshortcuts="Home" data-i18n-title="header.currentTitle">
+          <span class="current-choice-icon" aria-hidden="true">◎</span>
+          <span class="current-choice-label" data-i18n="header.current">К текущему</span>
+        </button>
       </div>
-      <div class="timeline-phase-overlay" aria-hidden="true"><span data-i18n="timeline.past">Сделанные выборы</span><span data-i18n="timeline.current">Текущий</span><span data-i18n="timeline.future">Впереди</span></div>
-      <div class="timeline-center-line" aria-hidden="true"></div>
       <main id="timelineViewport" class="timeline-viewport">
         <div id="timeline" class="timeline"></div>
       </main>
