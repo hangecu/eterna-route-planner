@@ -75,7 +75,6 @@
   let timelineSliderFrame = 0;
   let updateTimelineScrollbar = () => {};
   let toolsMenuOpen = false;
-  let routeInfoOpen = false;
   let headerCollapsed = Boolean(saved.ui?.headerCollapsed);
   let choiceHistoryOpen = false;
   let routeFileOpen = false;
@@ -1518,8 +1517,6 @@
     let state = replayResult.state;
     let tokens = new Set(replayResult.touched);
     let currentTokens = new Set();
-    let context = t("attribute.routeComplete");
-    let detail = t("attribute.finalValues");
     if (replayResult.currentSceneKey) {
       const item = flatScenes.find(candidate => candidate.key === replayResult.currentSceneKey);
       const result = replayResult.sceneResults.get(replayResult.currentSceneKey);
@@ -1527,15 +1524,12 @@
       tokens = new Set(result.touchedBefore);
       currentTokens = collectSceneTokens(item.scene);
       for (const token of currentTokens) tokens.add(token);
-      context = t("attribute.currentChoice");
-      detail = sceneName(item.scene);
     }
     const groups = attributeEntries(tokens, currentTokens);
     const cards = [...groups.entries()]
       .sort((left, right) => (meta.groups[left[0]]?.order ?? 99) - (meta.groups[right[0]]?.order ?? 99))
       .map(([groupId, entries]) => attributeGroupHtml(groupId, entries, state, currentTokens))
       .join("");
-    setHtml($("#attributeContext"), `<strong>${escapeHtml(context)}</strong>${escapeHtml(detail)}`);
     setHtml($("#attributeGroups"), cards || `<span class="attribute-empty">${escapeHtml(t("attribute.empty"))}</span>`);
   }
 
@@ -1749,7 +1743,13 @@
       available: replayResult.availableScenes, total: planningSceneItems.length
     });
     $("#appVersion").textContent = APP_VERSION;
-    $("#currentChoiceButton").classList.toggle("visible", Boolean(replayResult.currentSceneKey));
+    const currentChoiceButton = $("#currentChoiceButton");
+    currentChoiceButton.classList.toggle("visible", Boolean(currentItem));
+    const currentButtonTitle = currentItem
+      ? t("header.currentChapterTitle", { chapter: CHAPTER_NAMES[currentItem.chapter.id] || currentItem.chapter.id })
+      : t("header.currentTitle");
+    currentChoiceButton.title = currentButtonTitle;
+    currentChoiceButton.setAttribute("aria-label", currentButtonTitle);
     renderAttributeBar();
     updateHiddenScenesButton();
     if (panelOpen) renderPanel(panelMode);
@@ -1923,7 +1923,6 @@
     if (panelOpen) openPanel(false);
     if (choiceHistoryOpen) setChoiceHistoryOpen(false);
     openToolsMenu(false);
-    openRouteInfo(false);
     renderRouteFileDialog();
     requestAnimationFrame(() => {
       const firstAction = $("#exportRouteFileButton").disabled
@@ -2219,7 +2218,6 @@
     if (panelOpen) openPanel(false);
     if (routeFileOpen) setRouteFileOpen(false);
     openToolsMenu(false);
-    openRouteInfo(false);
     renderChoiceHistory(true);
     requestAnimationFrame(() => $("#closeChoiceHistory").focus());
   }
@@ -2465,32 +2463,22 @@
   function goToCurrentChoice() {
     clearSearch();
     openToolsMenu(false);
-    openRouteInfo(false);
     scrollToCurrent("smooth");
   }
 
   function openToolsMenu(open) {
-    if (open && routeInfoOpen) openRouteInfo(false);
     toolsMenuOpen = open;
     $("#toolsMenu").classList.toggle("open", open);
     $("#toolsMenu").setAttribute("aria-hidden", String(!open));
     $("#toolsMenuButton").setAttribute("aria-expanded", String(open));
+    if (!open) $("#technicalInfoDetails").open = false;
     if (open) requestAnimationFrame(() => $("#search").focus());
-  }
-
-  function openRouteInfo(open) {
-    if (open && toolsMenuOpen) openToolsMenu(false);
-    routeInfoOpen = open;
-    $("#routeInfoPanel").classList.toggle("open", open);
-    $("#routeInfoPanel").setAttribute("aria-hidden", String(!open));
-    $("#routeInfoButton").setAttribute("aria-expanded", String(open));
   }
 
   function setHeaderCollapsed(collapsed, persist = true) {
     headerCollapsed = Boolean(collapsed);
     if (headerCollapsed) {
       openToolsMenu(false);
-      openRouteInfo(false);
     }
     $("#attributeBar").classList.toggle("collapsed", headerCollapsed);
     const collapseButton = $("#headerToggleButton");
@@ -2519,7 +2507,6 @@
     $("#search").addEventListener("input", applySearch);
     $("#clearSearchButton").addEventListener("click", clearSearch);
     $("#toolsMenuButton").addEventListener("click", () => openToolsMenu(!toolsMenuOpen));
-    $("#routeInfoButton").addEventListener("click", () => openRouteInfo(!routeInfoOpen));
     $("#headerToggleButton").addEventListener("click", () => setHeaderCollapsed(true));
     $("#headerExpandButton").addEventListener("click", () => setHeaderCollapsed(false));
     $("#hiddenScenesButton").addEventListener("click", () => {
@@ -2686,8 +2673,8 @@
       timelineSliderMarkers.innerHTML = chapterRanges.map((chapter, index) => {
         const end = chapterRanges[index + 1]?.position ?? 100;
         const width = Math.max(0, end - chapter.position);
-        const lastClass = index === chapterRanges.length - 1 ? " is-last" : "";
-        return `<span class="timeline-chapter-segment${lastClass}" style="left:${chapter.position}%;width:${width}%"><span class="timeline-chapter-label">${romanNumeral(chapter.number)}</span></span><span class="timeline-chapter-marker" style="left:${chapter.position}%"></span>`;
+        const boundaryClass = index > 0 ? " has-boundary" : "";
+        return `<span class="timeline-chapter-segment${boundaryClass}" style="left:${chapter.position}%;width:${width}%"><span class="timeline-chapter-label">${romanNumeral(chapter.number)}</span></span>`;
       }).join("");
 
       const currentItem = replayResult?.currentSceneKey
@@ -2698,7 +2685,10 @@
       timelineCurrentMarker.hidden = !currentVisible;
       if (currentVisible) {
         const position = maximum > 0 ? clamp(scrollPositionForCard(currentCard) / maximum, 0, 1) * 100 : 0;
+        const chapterTitle = CHAPTER_NAMES[currentItem.chapter.id] || currentItem.chapter.id;
         timelineCurrentMarker.style.setProperty("--timeline-current-position", `${position}%`);
+        timelineCurrentMarker.dataset.label = chapterTitle;
+        timelineCurrentMarker.setAttribute("aria-label", t("header.currentChapterTitle", { chapter: chapterTitle }));
       }
     };
 
@@ -2723,6 +2713,22 @@
     });
     timelineSlider.addEventListener("change", () => timelineScrollbar.classList.remove("interacting"));
     timelineSlider.addEventListener("blur", () => timelineScrollbar.classList.remove("interacting"));
+    const showCurrentMarkerHint = () => {
+      const label = timelineCurrentMarker.dataset.label;
+      const position = timelineCurrentMarker.style.getPropertyValue("--timeline-current-position") || "0%";
+      if (!label) return;
+      timelineSliderTooltip.textContent = label;
+      timelineScrollbar.style.setProperty("--timeline-tooltip-position", position);
+    };
+    const restoreSliderHint = () => updateSliderDescription(timelineViewport.scrollLeft, Number(timelineSlider.max));
+    timelineCurrentMarker.addEventListener("pointerenter", showCurrentMarkerHint);
+    timelineCurrentMarker.addEventListener("pointerleave", restoreSliderHint);
+    timelineCurrentMarker.addEventListener("focus", showCurrentMarkerHint);
+    timelineCurrentMarker.addEventListener("blur", restoreSliderHint);
+    timelineCurrentMarker.addEventListener("click", event => {
+      event.stopPropagation();
+      goToCurrentChoice();
+    });
     timelineSlider.addEventListener("keydown", event => {
       const direction = ["ArrowRight", "ArrowDown"].includes(event.key)
         ? 1
@@ -2796,12 +2802,10 @@
       } else if (event.key === "Escape" && routeFileOpen) setRouteFileOpen(false);
       else if (event.key === "Escape" && choiceHistoryOpen) setChoiceHistoryOpen(false);
       else if (event.key === "Escape" && toolsMenuOpen) openToolsMenu(false);
-      else if (event.key === "Escape" && routeInfoOpen) openRouteInfo(false);
       else if (event.key === "Escape" && panelOpen) openPanel(false);
     });
     document.addEventListener("click", event => {
       if (toolsMenuOpen && !event.target.closest(".tools-menu-wrap")) openToolsMenu(false);
-      if (routeInfoOpen && !event.target.closest(".route-info-wrap")) openRouteInfo(false);
     });
   }
 

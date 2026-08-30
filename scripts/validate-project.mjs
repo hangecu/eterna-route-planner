@@ -98,11 +98,14 @@ if (!/\btarget="_blank"/i.test(supportLink) || !/\brel="[^"]*noopener[^"]*norefe
 if (!/<input\b[^>]*\bid="timelineSlider"[^>]*\btype="range"/i.test(html) && !/<input\b[^>]*\btype="range"[^>]*\bid="timelineSlider"/i.test(html)) {
   fail("В index.html отсутствует нижний ползунок маршрута");
 }
-for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton", "headerToggleButton", "headerExpandButton"]) {
+for (const id of ["timelineSliderMarkers", "timelineCurrentMarker", "timelineSliderTooltip", "searchModeBar", "clearSearchButton", "headerToggleButton", "headerExpandButton", "technicalInfoDetails"]) {
   if (!new RegExp(`\\bid="${id}"`).test(html)) fail(`В index.html отсутствует элемент интерфейса ${id}`);
 }
 if (/timeline-(?:phase-overlay|center-line)/.test(html)) {
   fail("В index.html остались прежние неподвижные обозначения текущей сцены");
+}
+if (/\bid="(?:routeInfoButton|routeInfoPanel|attributeContext)"/.test(html)) {
+  fail("В index.html остались удалённые элементы прежней шапки");
 }
 const currentChoiceButton = html.match(/<button\b[^>]*\bid="currentChoiceButton"[^>]*>/i)?.[0] || "";
 if (!/\baria-keyshortcuts="Home"/i.test(currentChoiceButton)) {

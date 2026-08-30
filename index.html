@@ -40,27 +40,24 @@
                 <span class="tools-group-title" data-i18n="tools.projectGroup">Проект</span>
                 <select id="languageSelect" data-language-select aria-label="Язык интерфейса"></select>
                 <a id="supportLink" class="support-link" href="https://web.tribute.tg/d/Ps8" target="_blank" rel="noopener noreferrer external" data-i18n="tools.support" data-i18n-title="tools.supportTitle">Поддержать · ₽ ↗</a>
+                <details id="technicalInfoDetails" class="technical-info-details">
+                  <summary data-i18n="routeInfo.button">Техническая информация</summary>
+                  <div class="technical-info-content">
+                    <span class="route-info-title" data-i18n="routeInfo.route">Маршрут</span>
+                    <span id="summary" class="route-summary" data-i18n="routeInfo.loading">Загрузка…</span>
+                    <span class="route-info-title" data-i18n="routeInfo.version">Версия</span>
+                    <span id="appVersion" class="app-version">0.9.3-beta</span>
+                    <span class="route-info-title" data-i18n="routeInfo.legend">Обозначения</span>
+                    <div class="legend" aria-hidden="true">
+                      <span data-i18n="routeInfo.available">доступно</span>
+                      <span class="unavailable" data-i18n="routeInfo.unavailable">недоступно</span>
+                      <span class="chosen" data-i18n="routeInfo.chosen">выбрано</span>
+                    </div>
+                  </div>
+                </details>
               </div>
               <div class="tools-danger-zone">
                 <button id="resetButton" class="danger" type="button" data-i18n="tools.reset">Сбросить выборы</button>
-              </div>
-            </div>
-          </div>
-          <div class="route-info-wrap">
-            <button id="routeInfoButton" class="compact-control-button labeled-control-button" type="button" aria-label="Сводка и обозначения" aria-controls="routeInfoPanel" aria-expanded="false" title="Сводка и обозначения" data-i18n-aria-label="routeInfo.title" data-i18n-title="routeInfo.title">
-              <span class="control-icon" aria-hidden="true">?</span>
-              <span class="control-label" data-i18n="routeInfo.button">Сводка</span>
-            </button>
-            <div id="routeInfoPanel" class="route-info-panel" aria-hidden="true">
-              <span class="route-info-title" data-i18n="routeInfo.route">Маршрут</span>
-              <span id="summary" class="route-summary" data-i18n="routeInfo.loading">Загрузка…</span>
-              <span class="route-info-title" data-i18n="routeInfo.version">Версия</span>
-              <span id="appVersion" class="app-version">0.9.3-beta</span>
-              <span class="route-info-title" data-i18n="routeInfo.legend">Обозначения</span>
-              <div class="legend" aria-hidden="true">
-                <span data-i18n="routeInfo.available">доступно</span>
-                <span class="unavailable" data-i18n="routeInfo.unavailable">недоступно</span>
-                <span class="chosen" data-i18n="routeInfo.chosen">выбрано</span>
               </div>
             </div>
           </div>
@@ -69,7 +66,6 @@
             <span class="control-label" data-i18n="header.collapse">Свернуть панель</span>
           </button>
         </div>
-        <div id="attributeContext" class="attribute-context"></div>
         <span id="routeNotice" class="route-notice" role="status" aria-live="polite"></span>
       </div>
       <div id="attributeGroups" class="attribute-groups"></div>
@@ -90,9 +86,9 @@
         <div id="timeline" class="timeline"></div>
       </main>
       <div id="timelineScrollbar" class="timeline-scrollbar">
-        <div class="timeline-slider-track-overlay" aria-hidden="true">
-          <div id="timelineSliderMarkers" class="timeline-slider-markers"></div>
-          <span id="timelineCurrentMarker" class="timeline-current-marker" hidden></span>
+        <div class="timeline-slider-track-overlay">
+          <div id="timelineSliderMarkers" class="timeline-slider-markers" aria-hidden="true"></div>
+          <button id="timelineCurrentMarker" class="timeline-current-marker" type="button" hidden></button>
         </div>
         <output id="timelineSliderTooltip" class="timeline-slider-tooltip" aria-hidden="true"></output>
         <input id="timelineSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Прокрутка маршрута" data-i18n-aria-label="timeline.scrollbar">
