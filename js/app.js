@@ -925,6 +925,70 @@
     }
   }
 
+  function groupRequirementText(group, scene, choice) {
+    if (!group) return t("condition.unknown");
+    const direct = (group.conditions || []).map(condition =>
+      conditionRequirementText(condition, scene, choice)
+    );
+    const alternatives = (group.anyOf || []).map(list =>
+      list.map(condition => conditionRequirementText(condition, scene, choice)).join(` ${t("common.and")} `)
+    );
+    const parts = [];
+    if (direct.length) parts.push(direct.join(` ${t("common.and")} `));
+    if (alternatives.length) parts.push(alternatives.map(text => `(${text})`).join(` ${t("common.or")} `));
+    return parts.join(` ${t("common.and")} `) || t("condition.none");
+  }
+
+  function conditionRequirementText(condition, scene, choice) {
+    const no = condition.not ? t("condition.notPrefix") : "";
+    switch (condition.type) {
+      case "stat":
+        return `${label(condition.parameter)} ${displayOperator(condition.operator)} ${condition.value}`;
+      case "relation":
+        return t("condition.relationRequired", {
+          character: label(condition.character), operator: displayOperator(condition.operator), value: condition.value
+        });
+      case "flag": {
+        const record = entity(condition.objective) || {};
+        if (record.auxiliary && record.auxiliaryKind) {
+          const expected = t(
+            `condition.auxiliary.${record.auxiliaryKind}.${condition.not ? "false" : "true"}`,
+            { label: record.label }
+          );
+          return t("condition.auxiliaryRequired", { expected });
+        }
+        return t("condition.objectiveRequired", { objective: label(condition.objective), not: no });
+      }
+      case "ending":
+        return t("condition.endingRequired", { ending: label(condition.ending), not: no });
+      case "faction":
+        return t("condition.estateRequired", {
+          estate: label(condition.estate),
+          parameter: meta.estateParameters[String(condition.estateParameter)] || condition.estateParameter,
+          operator: displayOperator(condition.operator), value: condition.value
+        });
+      case "article": {
+        const record = entity(condition.article) || {};
+        const expected = (record.values || {})[String(condition.value)] || condition.value;
+        return t("condition.articleRequired", {
+          article: label(condition.article), operator: condition.not ? "≠" : "=", expected
+        });
+      }
+      case "axis":
+        return `${bilateralSideLabel(condition.bilateralParameter, condition.side)} ${displayOperator(condition.operator)} ${condition.value}`;
+      case "status":
+        return t("condition.statusRequired", {
+          character: label(condition.character), not: no, status: label(condition.status)
+        });
+      case "block": {
+        const text = groupRequirementText(condition.block, scene, choice);
+        return condition.not ? `${t("common.not")} (${text})` : text;
+      }
+      case "always": return t("condition.none");
+      default: return condition.type;
+    }
+  }
+
   function isLocationCondition(condition) {
     return condition?.type === "flag" && referenceKey(condition.objective) === LOCATION_KEY;
   }
@@ -982,8 +1046,9 @@
     return effect.value > 0 ? "positive" : (effect.value < 0 ? "negative" : "");
   }
 
-  function conditionLine(condition, state, scene, choice) {
-    const passed = evaluateCondition(condition, state, scene, choice);
+  function conditionLine(condition, state, scene, choice, options = {}) {
+    const uncalculated = Boolean(options.uncalculated);
+    const passed = uncalculated ? false : evaluateCondition(condition, state, scene, choice);
     let binding = "";
     if (collectBindings) {
       const item = sceneToItem.get(scene);
@@ -991,26 +1056,30 @@
       conditionBindings.push({ id, item, condition, scene, choice });
       binding = ` data-condition-binding="${id}"`;
     }
-    return `<div class="condition-line ${passed ? "pass" : "fail"}"${binding}><span>${escapeHtml(conditionText(condition, state, scene, choice))}</span></div>`;
+    const stateClass = uncalculated ? "unknown" : (passed ? "pass" : "fail");
+    const text = uncalculated
+      ? conditionRequirementText(condition, scene, choice)
+      : conditionText(condition, state, scene, choice);
+    return `<div class="condition-line ${stateClass}"${binding}><span>${escapeHtml(text)}</span></div>`;
   }
 
-  function conditionHtml(condition, state, scene, choice) {
+  function conditionHtml(condition, state, scene, choice, options = {}) {
     if (isLocationCondition(condition)) return "";
     if (condition.type === "block" && !condition.not) {
-      const body = groupBodyHtml(condition.block, state, scene, choice);
+      const body = groupBodyHtml(condition.block, state, scene, choice, options);
       return body ? `<div class="condition-block">${body}</div>` : "";
     }
-    return conditionLine(condition, state, scene, choice);
+    return conditionLine(condition, state, scene, choice, options);
   }
 
-  function groupBodyHtml(group, state, scene, choice) {
+  function groupBodyHtml(group, state, scene, choice, options = {}) {
     if (!group) return "";
     const lines = [];
     const direct = group.conditions || [];
-    const directLines = direct.map(condition => conditionHtml(condition, state, scene, choice)).filter(Boolean);
+    const directLines = direct.map(condition => conditionHtml(condition, state, scene, choice, options)).filter(Boolean);
     lines.push(...directLines);
     const alternatives = (group.anyOf || []).map(list => list.map(condition =>
-      conditionHtml(condition, state, scene, choice)
+      conditionHtml(condition, state, scene, choice, options)
     ).join("")).filter(Boolean);
     if (alternatives.length) {
       if (directLines.length) lines.push(`<div class="logic-block-separator" aria-hidden="true"></div>`);
@@ -1024,21 +1093,25 @@
 
   function groupHtml(group, state, scene, choice, options = {}) {
     if (!group) return "";
-    const body = groupBodyHtml(group, state, scene, choice);
+    const uncalculated = Boolean(options.uncalculated);
+    const body = groupBodyHtml(group, state, scene, choice, options);
     if (!body) return "";
-    const passed = evaluateGroup(group, state, scene, choice);
+    const passed = !uncalculated && evaluateGroup(group, state, scene, choice);
     const payable = !passed && !group.unlock?.locked && Boolean(group.unlock?.parameter);
     const attributes = options.groupIndex == null ? "" : ` data-requirement-group="${options.groupIndex}"`;
-    const status = passed ? t("requirement.done") : (payable ? t("requirement.payable") : t("requirement.failed"));
-    return `<div class="logic-group ${passed ? "pass" : (payable ? "payable" : "fail")}"${attributes}>
+    const status = uncalculated
+      ? t("requirement.uncalculated")
+      : (passed ? t("requirement.done") : (payable ? t("requirement.payable") : t("requirement.failed")));
+    const stateClass = uncalculated ? "unknown" : (passed ? "pass" : (payable ? "payable" : "fail"));
+    return `<div class="logic-group ${stateClass}"${attributes}>
       <div class="logic-head"><span class="logic-result">${status}</span></div>
       ${body}
     </div>`;
   }
 
-  function requirementsHtml(choice, state, scene) {
+  function requirementsHtml(choice, state, scene, options = {}) {
     return (choice.requirements || []).map((group, index) =>
-      groupHtml(group, state, scene, choice, { groupIndex: index })
+      groupHtml(group, state, scene, choice, { ...options, groupIndex: index })
     ).join("");
   }
 
@@ -1246,6 +1319,10 @@
       : choiceAvailability(choice, result.state, item.scene, context);
   }
 
+  function routeUncalculatedBefore(result) {
+    return Boolean(result && !result.completeBefore && !result.blockedByEnding);
+  }
+
   function choiceHtml(choice, item, result, optionResult, position) {
     const state = result.state;
     const special = Boolean(item.scene.choiceSystem);
@@ -1253,8 +1330,9 @@
     const selected = String(selections[item.key]) === String(value);
     const availability = uiChoiceAvailability(choice, item, result, value);
     const available = result.available && availability.available;
+    const uncalculated = routeUncalculatedBefore(result);
     const invalid = selected && !result.selectedValid && !result.blockedByEnding;
-    const requirements = requirementsHtml(choice, state, item.scene);
+    const requirements = requirementsHtml(choice, state, item.scene, { uncalculated });
     const effects = effectsHtml(choice.effects, {
       state: result.state,
       completeBefore: result.completeBefore,
@@ -1264,10 +1342,11 @@
     });
     const number = special ? (choice.order || position + 1) : choice.number;
     const choiceLabel = choice.text || choice.title || choice.id;
-    const reason = !available && availability.reason ? availability.reason : "";
+    const reason = !uncalculated && !available && availability.reason ? availability.reason : "";
+    const payment = uncalculated ? "" : paymentsHtml(availability, item, value, selected);
     return `
-      <article class="choice-card ${available ? "" : "unavailable"} ${availability.unlockable ? "unlockable" : ""} ${selected ? "selected" : ""} ${invalid ? "invalid" : ""}"
-        role="button" tabindex="0" data-scene-key="${escapeHtml(item.key)}" data-choice="${escapeHtml(value)}" data-available="${available}">
+      <article class="choice-card ${available ? "" : "unavailable"} ${!uncalculated && availability.unlockable ? "unlockable" : ""} ${uncalculated ? "uncalculated" : ""} ${selected ? "selected" : ""} ${invalid ? "invalid" : ""}"
+        role="button" tabindex="0" data-scene-key="${escapeHtml(item.key)}" data-choice="${escapeHtml(value)}" data-available="${available}" data-uncalculated="${uncalculated}">
         <div class="choice-heading">
           <span class="choice-number">${escapeHtml(number)}</span>
           <span class="choice-text">${escapeHtml(choiceLabel)}</span>
@@ -1275,7 +1354,7 @@
         </div>
         <div class="reason choice-reason">${escapeHtml(reason)}</div>
         ${requirements ? `<div class="section-label">${escapeHtml(t("section.conditions"))}</div>${requirements}` : ""}
-        <div class="choice-payment">${paymentsHtml(availability, item, value, selected)}</div>
+        <div class="choice-payment">${payment}</div>
         <div class="choice-effects">${effects ? `<div class="section-label">${escapeHtml(t("section.effects"))}</div><div class="logic-group">${effects}</div>` : ""}</div>
       </article>`;
   }
@@ -1293,6 +1372,7 @@
     const { chapter, scene, key } = item;
     const result = replayResult.sceneResults.get(key);
     const selected = selections[key] != null;
+    const uncalculated = routeUncalculatedBefore(result);
     let choices = scene.choices || [];
     if (scene.choiceSystem) choices = planner.choiceSystems[scene.choiceSystem].options;
     const choicesMarkup = choices.map((choice, index) =>
@@ -1315,7 +1395,7 @@
     const variant = variants.map(text => `<div class="scene-variant">${escapeHtml(text)}</div>`).join("");
     const typeBadge = sceneTypeBadge(scene);
     return `
-      <article class="scene-card ${isRecurringScene(scene) ? "recurring-scene" : ""} ${result.available ? "" : "unavailable"} ${selected ? "has-selection" : ""}" data-scene-id="${escapeHtml(scene.id)}" data-scene-key="${escapeHtml(key)}">
+      <article class="scene-card ${isRecurringScene(scene) ? "recurring-scene" : ""} ${result.available ? "" : "unavailable"} ${uncalculated ? "route-uncalculated" : ""} ${selected ? "has-selection" : ""}" data-scene-id="${escapeHtml(scene.id)}" data-scene-key="${escapeHtml(key)}">
         <div class="scene-topline">
           ${typeBadge ? `<span class="type-badge">${escapeHtml(typeBadge)}</span>` : ""}
           <span class="state-badge ${result.available ? "ok" : "no"}">${escapeHtml(t(result.available ? "scene.available" : "scene.unavailable"))}</span>
@@ -1323,6 +1403,10 @@
         <h2 class="scene-id" title="${escapeHtml(scene.id)}">${escapeHtml(sceneName(scene))}</h2>
         ${variant}
         <div class="reason scene-reason">${escapeHtml(reason)}</div>
+        ${choicesMarkup ? `<button class="route-gap-notice" type="button" data-go-current-choice ${uncalculated ? "" : "hidden"}>
+          <span class="route-gap-status">${escapeHtml(t("routeGap.status"))}</span>
+          <span class="route-gap-hint">${escapeHtml(t("routeGap.hint"))}</span>
+        </button>` : ""}
         ${appearance ? `<div class="section-label">${escapeHtml(t("section.appearance"))}</div>${appearance}` : ""}
         <div class="scene-effects">${effects ? `<div class="section-label">${escapeHtml(t("section.automaticEffects"))}</div><div class="logic-group">${effects}</div>` : ""}</div>
         ${choicesMarkup ? `<div class="section-label">${escapeHtml(t("section.choice"))}</div><div class="choices">${choicesMarkup}</div>${scene.choiceSystem === "annualProjects" ? `<p class="case-choice-empty" hidden>${escapeHtml(t("scene.noAnnualChoices"))}</p>` : ""}` : (!effects ? `<p class="empty-scene">${escapeHtml(t("scene.empty"))}</p>` : "")}
@@ -1603,11 +1687,18 @@
     });
   }
 
-  function updateRequirementGroups(choiceElement, availability) {
+  function updateRequirementGroups(choiceElement, availability, uncalculated = false) {
     choiceElement.querySelectorAll("[data-requirement-group]").forEach(groupElement => {
       const index = Number(groupElement.dataset.requirementGroup);
       const detail = availability.details && availability.details[index];
       if (!detail) return;
+      groupElement.classList.toggle("unknown", uncalculated);
+      if (uncalculated) {
+        groupElement.classList.remove("pass", "payable", "fail");
+        const result = groupElement.querySelector(".logic-result");
+        if (result) result.textContent = t("requirement.uncalculated");
+        return;
+      }
       const payment = (availability.payments || []).find(item => item.groupIndexes.includes(index));
       const payable = detail.payable && !detail.satisfied;
       const waitingForRequired = payable && (availability.hardBlocked || availability.structuralBlocked);
@@ -1647,6 +1738,7 @@
       else sceneElement.removeAttribute("aria-current");
       if (item.flatIndex < fromIndex && !isRecurringScene(item.scene)) continue;
       const hasSelection = selections[item.key] != null;
+      const uncalculated = routeUncalculatedBefore(result);
       const automaticEffects = effectsHtml(item.scene.effects, {
         state: result.state,
         completeBefore: result.completeBefore,
@@ -1657,10 +1749,11 @@
         ? `<div class="section-label">${escapeHtml(t("section.automaticEffects"))}</div><div class="logic-group">${automaticEffects}</div>`
         : "";
       const unavailableReason = result.available ? "" : unavailableSceneReason(item, result);
-      const sceneSignature = `${result.available}|${result.alreadyShown}|${hasSelection}|${unavailableReason}|${automaticEffectsSection}`;
+      const sceneSignature = `${result.available}|${result.alreadyShown}|${uncalculated}|${hasSelection}|${unavailableReason}|${automaticEffectsSection}`;
       if (sceneElement.dataset.dynamicSignature !== sceneSignature) {
         sceneElement.dataset.dynamicSignature = sceneSignature;
         sceneElement.classList.toggle("unavailable", !result.available);
+        sceneElement.classList.toggle("route-uncalculated", uncalculated);
         sceneElement.classList.toggle("has-selection", hasSelection);
         const badge = sceneElement.querySelector(".state-badge");
         badge.classList.toggle("ok", result.available);
@@ -1668,6 +1761,8 @@
         badge.textContent = t(result.available ? "scene.available" : "scene.unavailable");
         const sceneReason = sceneElement.querySelector(".scene-reason");
         sceneReason.textContent = unavailableReason;
+        const routeGapNotice = sceneElement.querySelector(".route-gap-notice");
+        if (routeGapNotice) routeGapNotice.hidden = !uncalculated;
         setHtml(sceneElement.querySelector(".scene-effects"), automaticEffectsSection);
       }
 
@@ -1683,12 +1778,12 @@
         if (item.scene.choiceSystem === "annualProjects" && !hideForCase) visibleCaseChoices += 1;
         const selected = String(selections[item.key]) === String(value);
         const invalid = selected && !result.selectedValid && !result.blockedByEnding;
-        const reason = available ? "" : (
+        const reason = uncalculated || available ? "" : (
           !result.available
             ? t("scene.notAvailable")
             : (availability.reason || (availability.unlockable ? t("scene.unlockHint") : t("choice.conditionsFailed")))
         );
-        const payment = paymentsHtml(availability, item, value, selected);
+        const payment = uncalculated ? "" : paymentsHtml(availability, item, value, selected);
         const effects = effectsHtml(choice.effects, {
           state: result.state,
           completeBefore: result.completeBefore,
@@ -1703,19 +1798,21 @@
           const groupPayment = (availability.payments || []).find(candidate => candidate.groupIndexes.includes(index));
           return `${detail.satisfied ? 1 : 0}${detail.payable ? 1 : 0}${groupPayment?.armed ? 1 : 0}`;
         }).join("");
-        const choiceSignature = `${available}|${availability.unlockable}|${availability.hardBlocked}|${availability.structuralBlocked}|${groupSignature}|${selected}|${invalid}|${reason}|${payment}|${effectsSection}`;
+        const choiceSignature = `${available}|${availability.unlockable}|${availability.hardBlocked}|${availability.structuralBlocked}|${uncalculated}|${groupSignature}|${selected}|${invalid}|${reason}|${payment}|${effectsSection}`;
         if (choiceElement.dataset.dynamicSignature !== choiceSignature) {
           choiceElement.dataset.dynamicSignature = choiceSignature;
           choiceElement.dataset.available = String(available);
+          choiceElement.dataset.uncalculated = String(uncalculated);
           choiceElement.classList.toggle("unavailable", !available);
-          choiceElement.classList.toggle("unlockable", !available && availability.unlockable);
+          choiceElement.classList.toggle("unlockable", !uncalculated && !available && availability.unlockable);
+          choiceElement.classList.toggle("uncalculated", uncalculated);
           choiceElement.classList.toggle("selected", selected);
           choiceElement.classList.toggle("invalid", invalid);
           choiceElement.querySelector(".choice-mark").textContent = selected ? "✓" : "";
           choiceElement.querySelector(".choice-reason").textContent = reason;
           setHtml(choiceElement.querySelector(".choice-payment"), payment);
           setHtml(choiceElement.querySelector(".choice-effects"), effectsSection);
-          updateRequirementGroups(choiceElement, availability);
+          updateRequirementGroups(choiceElement, availability, uncalculated);
         }
       }
       const caseEmpty = sceneElement.querySelector(".case-choice-empty");
@@ -1725,21 +1822,28 @@
     for (const binding of conditionBindings) {
       if (!binding.item || (binding.item.flatIndex < fromIndex && !isRecurringScene(binding.item.scene)) || !binding.element) continue;
       const result = replayResult.sceneResults.get(binding.item.key);
-      const passed = binding.list
+      const uncalculated = routeUncalculatedBefore(result) && Boolean(binding.choice);
+      const passed = !uncalculated && (binding.list
         ? binding.list.every(condition => evaluateCondition(condition, result.state, binding.scene, binding.choice))
-        : evaluateCondition(binding.condition, result.state, binding.scene, binding.choice);
+        : evaluateCondition(binding.condition, result.state, binding.scene, binding.choice));
       const text = binding.list
-        ? `${binding.listIndex + 1}. ${binding.list.map(condition => conditionText(condition, result.state, binding.scene, binding.choice)).join(` ${t("common.and")} `)}`
-        : conditionText(binding.condition, result.state, binding.scene, binding.choice);
+        ? `${binding.listIndex + 1}. ${binding.list.map(condition => uncalculated
+          ? conditionRequirementText(condition, binding.scene, binding.choice)
+          : conditionText(condition, result.state, binding.scene, binding.choice)).join(` ${t("common.and")} `)}`
+        : (uncalculated
+          ? conditionRequirementText(binding.condition, binding.scene, binding.choice)
+          : conditionText(binding.condition, result.state, binding.scene, binding.choice));
       if (binding.lastText !== text) {
         binding.lastText = text;
         const copy = binding.element.querySelector("span");
         if (copy) copy.textContent = text;
       }
-      if (binding.lastPassed !== passed) {
-        binding.lastPassed = passed;
+      const stateKey = uncalculated ? "unknown" : (passed ? "pass" : "fail");
+      if (binding.lastPassed !== stateKey) {
+        binding.lastPassed = stateKey;
         binding.element.classList.toggle("pass", passed);
-        binding.element.classList.toggle("fail", !passed);
+        binding.element.classList.toggle("fail", !uncalculated && !passed);
+        binding.element.classList.toggle("unknown", uncalculated);
       }
     }
 
@@ -2189,8 +2293,9 @@
       return;
     }
     const result = replayResult.sceneResults.get(targetItem.key);
+    const uncalculated = routeUncalculatedBefore(result);
     const availability = uiChoiceAvailability(targetChoice, targetItem, result, choiceHistoryTarget.value);
-    const available = Boolean(result?.available && availability.available);
+    const available = Boolean(!uncalculated && result?.available && availability.available);
     const tokens = targetRequirementTokens(targetItem, targetChoice);
     const targetKeys = new Set([...tokens].map(entryKey));
     const tokenLabels = [...new Set([...tokens].map(numericTokenLabel))];
@@ -2199,12 +2304,12 @@
     $("#choiceHistoryTitle").textContent = t("history.editTitle");
     $("#choiceHistoryTarget").textContent = `${sceneName(targetItem.scene)} · ${targetName}`;
     const requirements =
-      groupHtml(targetItem.scene.appearance, result.state, targetItem.scene, null) +
-      requirementsHtml(targetChoice, result.state, targetItem.scene);
+      groupHtml(targetItem.scene.appearance, result.state, targetItem.scene, null, { uncalculated }) +
+      requirementsHtml(targetChoice, result.state, targetItem.scene, { uncalculated });
     $("#choiceHistoryStatus").innerHTML = `
       <div class="choice-history-status-copy">
-        <span class="choice-history-state ${available ? "available" : ""}">${escapeHtml(t(available ? "history.available" : "history.unavailable"))}</span>
-        <span class="choice-history-traits">${escapeHtml(tokenLabels.length ? t("history.searchAffects", { attributes: tokenLabels.join(", ") }) : t("history.noNumeric"))}</span>
+        <span class="choice-history-state ${available ? "available" : ""}">${escapeHtml(t(uncalculated ? "routeGap.status" : (available ? "history.available" : "history.unavailable")))}</span>
+        <span class="choice-history-traits">${escapeHtml(uncalculated ? t("routeGap.hint") : (tokenLabels.length ? t("history.searchAffects", { attributes: tokenLabels.join(", ") }) : t("history.noNumeric")))}</span>
         <div class="choice-history-condition">${requirements}</div>
       </div>
       ${available ? `<button type="button" data-history-goto-target>${escapeHtml(t("history.goToChoice"))}</button>` : ""}`;
@@ -2632,6 +2737,12 @@
       }
     });
     $("#timeline").addEventListener("click", event => {
+      const routeGapNotice = event.target.closest("[data-go-current-choice]");
+      if (routeGapNotice) {
+        event.stopPropagation();
+        goToCurrentChoice();
+        return;
+      }
       const unlock = event.target.closest(".unlock-action");
       if (unlock) {
         event.stopPropagation();

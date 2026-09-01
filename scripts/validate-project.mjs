@@ -117,10 +117,10 @@ if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/i.test(styles)) {
   fail("В стилях не учтён системный режим уменьшенной анимации");
 }
 const appSource = read("js/app.js");
-for (const marker of ["timeline.position", "search.active", "sceneTypeBadge", "chapterLanguageSelect", "romanNumeral", "updateCurrentNavigationVisibility"]) {
+for (const marker of ["timeline.position", "search.active", "sceneTypeBadge", "chapterLanguageSelect", "romanNumeral", "updateCurrentNavigationVisibility", "routeUncalculatedBefore", "conditionRequirementText", "routeGap.hint"]) {
   if (!appSource.includes(marker)) fail(`js/app.js: отсутствует поддержка ${marker}`);
 }
-for (const marker of ["timeline-chapter-segment", "timeline-chapter-label", "scene-card.timeline-current::after", "header-current-button", "contextual-visible"]) {
+for (const marker of ["timeline-chapter-segment", "timeline-chapter-label", "scene-card.timeline-current::after", "header-current-button", "contextual-visible", "choice-card.uncalculated", "route-gap-notice", "logic-group.unknown"]) {
   if (!styles.includes(marker)) fail(`assets/styles.css: отсутствует оформление ${marker}`);
 }
 for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
