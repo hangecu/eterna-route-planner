@@ -774,7 +774,11 @@
       background: linear-gradient(155deg, #20211f, #191a19);
       border-color: #484944;
       box-shadow: 0 14px 42px rgba(0, 0, 0, .24);
+      filter: grayscale(.72) brightness(.88);
+      opacity: .72;
     }
+    .scene-card.unavailable:hover,
+    .scene-card.unavailable:focus-within { filter: grayscale(.55) brightness(.94); opacity: .82; }
     .scene-card.unavailable .scene-id { color: #d1ccc2; }
     .scene-card.has-selection { border-color: rgba(114, 182, 140, .8); }
     .scene-card.timeline-past:not(.unavailable) { background: linear-gradient(155deg, #222923, #1a1d1a); }
@@ -859,6 +863,13 @@
     }
     .route-gap-notice[hidden] { display: none; }
     .route-gap-notice:hover { color: #e0e7ec; background: rgba(92, 116, 136, .27); border-color: rgba(142, 172, 196, .7); }
+    .scene-card.unavailable .route-gap-notice {
+      opacity: .78;
+      background: rgba(53, 63, 71, .14);
+      border-color: rgba(112, 128, 140, .34);
+    }
+    .scene-card.unavailable .route-gap-notice:hover,
+    .scene-card.unavailable .route-gap-notice:focus-visible { opacity: 1; }
     .route-gap-status {
       padding: 2px 6px;
       color: #b9cbd8;
