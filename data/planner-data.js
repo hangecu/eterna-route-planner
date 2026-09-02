@@ -16,7 +16,7 @@
 
   globalThis.PLANNER_PAYLOAD = {
     app: {
-      version: "0.9.3-beta"
+      version: "0.9.4-beta"
     },
     planner: {
       schemaVersion: 5,
